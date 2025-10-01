@@ -1,0 +1,49 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "name": "John Doe",
+      "email": "tenant@example.com",
+      "phone": "+254712345678",
+      "idNumber": "12345678",
+      "apartmentName": "Muthuku Apartments",
+      "houseNumber": "A1",
+      "password": "password123",
+      "role": "tenant",
+      "isVerified": true,
+      "createdAt": "2023-10-01T00:00:00.000Z"
+    }
+  ],
+  "rents": [
+    {
+      "id": "1",
+      "tenantId": "1",
+      "amount": 15000,
+      "dueDate": "2023-11-01T00:00:00.000Z",
+      "status": "pending",
+      "month": "October 2023"
+    }
+  ],
+  "claims": [
+    {
+      "id": "1",
+      "tenantId": "1",
+      "title": "Leaking Kitchen Faucet",
+      "category": "plumbing",
+      "description": "The kitchen faucet has been dripping constantly.",
+      "urgency": "medium",
+      "status": "submitted",
+      "createdAt": "2023-10-15T00:00:00.000Z"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "1",
+      "userId": "1",
+      "type": "welcome",
+      "message": "Welcome to Muthuku Apartments Portal!",
+      "isRead": false,
+      "createdAt": "2023-10-01T00:00:00.000Z"
+    }
+  ]
+}

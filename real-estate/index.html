@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Muthuku Apartments Portal</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header" id="appHeader" style="display: none;">
+            <div class="logo">
+                <h1>Muthuku Apartments Portal</h1>
+            </div>
+            <div class="user-info">
+                <span id="userWelcome">Welcome, User</span>
+                <button class="btn btn-danger" onclick="auth.logout()">Logout</button>
+            </div>
+        </header>
+
+        <!-- Login Page -->
+        <div id="loginPage" class="auth-container">
+            <div class="auth-form">
+                <h2>Login to Muthuku Apartments</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="loginEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="loginPassword" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Login</button>
+                </form>
+                <div id="loginMessage" class="message" style="display: none;"></div>
+                <p class="text-center mt-2">
+                    Don't have an account? 
+                    <a href="#" onclick="auth.showRegister()" style="color: #3498db;">Register here</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Register Page -->
+        <div id="registerPage" class="auth-container" style="display: none;">
+            <div class="auth-form">
+                <h2>Register for Muthuku Apartments</h2>
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="regName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="regEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" id="regPhone" required>
+                    </div>
+                    <div class="form-group">
+                        <label>National ID Number</label>
+                        <input type="text" id="regIdNumber" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Apartment Name</label>
+                        <input type="text" id="regApartment" value="Muthuku Apartments" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>House Number</label>
+                        <select id="regHouseNumber" required>
+                            <option value="">Select House Number</option>
+                            <option value="A1">A1</option>
+                            <option value="A2">A2</option>
+                            <option value="A3">A3</option>
+                            <option value="B1">B1</option>
+                            <option value="B2">B2</option>
+                            <option value="B3">B3</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="regPassword" required minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm Password</label>
+                        <input type="password" id="regConfirmPassword" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Register</button>
+                </form>
+                <div id="registerMessage" class="message" style="display: none;"></div>
+                <p class="text-center mt-2">
+                    Already have an account? 
+                    <a href="#" onclick="auth.showLogin()" style="color: #3498db;">Login here</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Main App -->
+        <div id="mainApp" style="display: none;">
+            <!-- Navigation Tabs -->
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="ui.showTab('dashboard')">Dashboard</button>
+                <button class="nav-tab" onclick="ui.showTab('rent')">Rent & Payments</button>
+                <button class="nav-tab" onclick="ui.showTab('claims')">Maintenance Claims</button>
+                <button class="nav-tab" onclick="ui.showTab('profile')">Profile</button>
+            </div>
+
+            <!-- Dashboard Tab -->
+            <div id="dashboardTab" class="tab-content active">
+                <div class="dashboard-grid">
+                    <!-- Rent Status Card -->
+                    <div class="card">
+                        <h2>Rent Status</h2>
+                        <div id="rentStatus" class="rent-info">
+                            <div class="loading">Loading...</div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="card">
+                        <h2>Quick Actions</h2>
+                        <div class="action-grid">
+                            <button class="btn btn-primary" onclick="ui.showTab('claims'); claims.openNewClaimModal();">
+                                Raise a Claim
+                            </button>
+                            <button class="btn btn-success" onclick="ui.showTab('rent')">
+                                Pay Rent
+                            </button>
+                            <button class="btn btn-secondary" onclick="dashboard.refreshData()">
+                                Refresh Data
+                            </button>
+                            <button class="btn btn-secondary" onclick="ui.showTab('profile')">
+                                Update Profile
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Notifications -->
+                    <div class="card">
+                        <h2>Recent Notifications</h2>
+                        <div id="notificationsList">
+                            <div class="loading">Loading...</div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Claims -->
+                    <div class="card">
+                        <h2>Recent Claims</h2>
+                        <div id="recentClaims">
+                            <div class="loading">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rent Tab -->
+            <div id="rentTab" class="tab-content">
+                <div class="card">
+                    <h2>Rent History</h2>
+                    <div id="rentHistory">
+                        <div class="loading">Loading rent history...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Claims Tab -->
+            <div id="claimsTab" class="tab-content">
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h2>Maintenance Claims</h2>
+                        <button class="btn btn-primary" onclick="claims.openNewClaimModal()">
+                            New Claim
+                        </button>
+                    </div>
+                    <div id="claimsList">
+                        <div class="loading">Loading claims...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Tab -->
+            <div id="profileTab" class="tab-content">
+                <div class="card">
+                    <h2>Profile Information</h2>
+                    <div id="profileInfo">
+                        <div class="loading">Loading profile...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Claim Modal -->
+    <div id="newClaimModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Submit New Claim</h2>
+                <button class="close-modal" onclick="claims.closeNewClaimModal()">&times;</button>
+            </div>
+            <form id="newClaimForm">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="claimTitle" required placeholder="Brief description of the issue">
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="claimCategory" required>
+                        <option value="plumbing">Plumbing</option>
+                        <option value="electrical">Electrical</option>
+                        <option value="security">Security</option>
+                        <option value="general">General Repair</option>
+                        <option value="complaint">Complaint</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Urgency</label>
+                    <select id="claimUrgency" required>
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                        <option value="critical">Critical</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="claimDescription" required rows="4" placeholder="Detailed description of the issue..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Submit Claim</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="auth.js"></script>
+    <script src="dashboard.js"></script>
+    <script src="claims.js"></script>
+    <script src="ui.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
