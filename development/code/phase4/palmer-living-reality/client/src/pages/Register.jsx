@@ -27,7 +27,7 @@ const Register = () => {
       .oneOf([Yup.ref('password'), null], 'Passwords must match')
       .required('Please confirm your password'),
     role: Yup.string()
-      .oneOf(['tenant', 'owner'], 'Please select a role')
+      .oneOf(['tenant', 'owner', 'admin'], 'Please select a role')
       .required('Please select a role'),
     phone: Yup.string()
       .matches(/^[0-9+\-\s]+$/, 'Invalid phone number format')
@@ -42,6 +42,8 @@ const Register = () => {
     if (result.success) {
       if (values.role === 'tenant') {
         navigate('/dashboard?message=verification-pending');
+      } else if (values.role === 'admin') {
+        navigate('/admin');
       } else {
         navigate('/');
       }
@@ -80,6 +82,7 @@ const Register = () => {
                 <Field as="select" name="role" id="role" className="form-select">
                   <option value="tenant">Tenant (Looking to rent)</option>
                   <option value="owner">Property Owner (List properties)</option>
+                  <option value="admin">Administrator (System management)</option>
                 </Field>
                 <ErrorMessage name="role" component="div" className="form-error" />
               </div>
