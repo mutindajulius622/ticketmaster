@@ -9,6 +9,14 @@ const Register = () => {
   const { register } = useAuth();
 
   const validationSchema = Yup.object({
+    first_name: Yup.string()
+      .min(1, 'First name is required')
+      .max(50, 'First name must be less than 50 characters')
+      .required('First name is required'),
+    last_name: Yup.string()
+      .min(1, 'Last name is required')
+      .max(50, 'Last name must be less than 50 characters')
+      .required('Last name is required'),
     username: Yup.string()
       .min(3, 'Username must be at least 3 characters')
       .max(50, 'Username must be less than 50 characters')
@@ -61,6 +69,8 @@ const Register = () => {
 
         <Formik
           initialValues={{ 
+            first_name: '',
+            last_name: '',
             username: '', 
             email: '', 
             password: '', 
@@ -85,6 +95,32 @@ const Register = () => {
                   <option value="admin">Administrator (System management)</option>
                 </Field>
                 <ErrorMessage name="role" component="div" className="form-error" />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className="form-group">
+                  <label htmlFor="first_name" className="form-label">First Name *</label>
+                  <Field 
+                    type="text" 
+                    name="first_name" 
+                    id="first_name"
+                    className={`form-input ${errors.first_name ? 'error' : ''}`}
+                    placeholder="John"
+                  />
+                  <ErrorMessage name="first_name" component="div" className="form-error" />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="last_name" className="form-label">Last Name *</label>
+                  <Field 
+                    type="text" 
+                    name="last_name" 
+                    id="last_name"
+                    className={`form-input ${errors.last_name ? 'error' : ''}`}
+                    placeholder="Doe"
+                  />
+                  <ErrorMessage name="last_name" component="div" className="form-error" />
+                </div>
               </div>
 
               <div className="form-group">

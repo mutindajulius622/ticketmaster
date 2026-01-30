@@ -13,6 +13,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import OwnerDashboard from './pages/OwnerDashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import Payments from './pages/Payments';
 
 function App() {
   return (
@@ -35,6 +36,16 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Dashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              {/* Payments Route - All authenticated users */}
+              <Route 
+                path="/payments" 
+                element={
+                  <ProtectedRoute>
+                    <Payments />
                   </ProtectedRoute>
                 } 
               />

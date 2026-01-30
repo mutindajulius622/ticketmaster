@@ -88,6 +88,13 @@ const Navbar = () => {
                 Dashboard
               </Link>
               
+              <Link 
+                to="/payments" 
+                className={`nav-link ${isActive('/payments') ? 'active' : ''}`}
+              >
+                💳 Payments
+              </Link>
+              
               <div className="flex gap-1" style={{ alignItems: 'center', marginLeft: '0.5rem' }}>
                 <div style={{ 
                   width: 36, 

@@ -55,5 +55,11 @@ export const rentalService = {
   delete: (id) => api.delete(`/rental-agreements/${id}`)
 };
 
+export const paymentService = {
+  initiate: (data) => api.post('/payments/initiate', data),
+  getStatus: (paymentId) => api.get(`/payments/${paymentId}/status`),
+  getAll: () => api.get('/payments')
+};
+
 export default api;
 

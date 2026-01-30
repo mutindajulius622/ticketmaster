@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const response = await axios.get('/api/me');
+      const response = await api.get('/me');
       setUser(response.data);
     } catch (err) {
       // User is not authenticated or backend is not running
@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (username, password) => {
     try {
       setError(null);
-      const response = await axios.post('/api/login', { username, password });
+      const response = await api.post('/login', { username, password });
       setUser(response.data);
       return { success: true };
     } catch (err) {
@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       setError(null);
-      const response = await axios.post('/api/register', userData);
+      const response = await api.post('/register', userData);
       setUser(response.data);
       return { success: true };
     } catch (err) {
@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await axios.post('/api/logout');
+      await api.post('/logout');
       setUser(null);
     } catch (err) {
       console.error('Logout error:', err);
