@@ -31,8 +31,8 @@ const OwnerDashboard = () => {
           myProperties.some(p => p.id === a.property_id)
         );
         setAgreements(myAgreements);
-      } catch (error) {
-        console.error('Error fetching data:', error);
+      } catch {
+        // Silently handle error - page will show empty state
       } finally {
         setLoading(false);
       }

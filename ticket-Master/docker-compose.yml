@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    container_name: ticket-master-db
+    environment:
+      POSTGRES_USER: ticket_user
+      POSTGRES_PASSWORD: secure_password
+      POSTGRES_DB: ticket_master
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ticket-network
+
+  # Flask Backend
+  backend:
+    build: ./backend
+    container_name: ticket-master-backend
+    environment:
+      FLASK_ENV: production
+      DATABASE_URL: postgresql://ticket_user:secure_password@postgres:5432/ticket_master
+      JWT_SECRET_KEY: your-secret-key-change-in-production
+      CORS_ORIGINS: http://localhost:3000
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres
+    volumes:
+      - ./backend:/app
+    networks:
+      - ticket-network
+
+  # React Frontend
+  frontend:
+    build: ./frontend
+    container_name: ticket-master-frontend
+    environment:
+      REACT_APP_API_URL: http://localhost:5000/api
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - ticket-network
+
+  # Redis (optional - for caching)
+  redis:
+    image: redis:7-alpine
+    container_name: ticket-master-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - ticket-network
+
+volumes:
+  postgres_data:
+
+networks:
+  ticket-network:
+    driver: bridge

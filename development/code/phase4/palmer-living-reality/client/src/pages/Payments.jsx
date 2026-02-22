@@ -22,8 +22,8 @@ function PaymentsPage() {
       ]);
       setPayments(paymentsRes.data);
       setRentalAgreements(rentalsRes.data);
-    } catch (error) {
-      console.error('Failed to load data:', error);
+    } catch {
+      // Silently handle error - page will show empty state
     } finally {
       setLoading(false);
     }
@@ -65,6 +65,7 @@ function PaymentsPage() {
 
   return (
     <div className="payments-page">
+      <div className="container">
       <div className="page-header">
         <h1>💳 Payments</h1>
         <p>Manage your rent payments and view payment history</p>
@@ -148,6 +149,7 @@ function PaymentsPage() {
             </tbody>
           </table>
         )}
+      </div>
       </div>
     </div>
   );

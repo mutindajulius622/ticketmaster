@@ -6,9 +6,27 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:5000', // Should match Flask port
+        target: 'http://localhost:5555',
         changeOrigin: true,
         secure: false
+      }
+    }
+  },
+  build: {
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+        pure_funcs: ['console.log', 'console.info', 'console.debug']
+      }
+    },
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          api: ['axios', 'formik', 'yup']
+        }
       }
     }
   }

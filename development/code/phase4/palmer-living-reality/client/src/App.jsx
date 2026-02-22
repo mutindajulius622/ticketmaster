@@ -14,6 +14,7 @@ import Dashboard from './pages/Dashboard';
 import OwnerDashboard from './pages/OwnerDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import Payments from './pages/Payments';
+import InquiryForm from './pages/InquiryForm';
 
 function App() {
   return (
@@ -49,6 +50,9 @@ function App() {
                   </ProtectedRoute>
                 } 
               />
+
+              {/* Inquiry Routes - Public (no auth required) */}
+              <Route path="/inquiry/:inquiryType/:propertyId" element={<InquiryForm />} />
 
               {/* Owner Routes */}
               <Route 

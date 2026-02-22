@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: palmer-db
+    environment:
+      POSTGRES_USER: palmer_user
+      POSTGRES_PASSWORD: palmer_password
+      POSTGRES_DB: palmer_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U palmer_user -d palmer_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Flask Backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: palmer-backend
+    environment:
+      DATABASE_URI: postgresql://palmer_user:palmer_password@db:5432/palmer_db
+      SECRET_KEY: your-production-secret-key-change-this
+      FLASK_ENV: production
+      MPESA_ENVIRONMENT: sandbox
+    ports:
+      - "5555:5555"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./server/instance:/app/instance
+
+  # Redis for caching (optional, for future use)
+  redis:
+    image: redis:7-alpine
+    container_name: palmer-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  default:
+    name: palmer-network
+

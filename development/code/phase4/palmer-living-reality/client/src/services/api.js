@@ -35,7 +35,15 @@ export const propertyService = {
   getById: (id) => api.get(`/properties/${id}`),
   create: (data) => api.post('/properties', data),
   update: (id, data) => api.put(`/properties/${id}`, data),
-  delete: (id) => api.delete(`/properties/${id}`)
+  delete: (id) => api.delete(`/properties/${id}`),
+  getAmenities: (propertyId) => api.get(`/properties/${propertyId}/amenities`),
+  addAmenity: (propertyId, amenityId) => api.post(`/properties/${propertyId}/amenities`, { amenity_id: amenityId }),
+  removeAmenity: (propertyId, amenityId) => api.delete(`/properties/${propertyId}/amenities`, { data: { amenity_id: amenityId } })
+};
+
+export const amenityService = {
+  getAll: () => api.get('/amenities'),
+  create: (data) => api.post('/amenities', data)
 };
 
 export const userService = {
@@ -61,5 +69,13 @@ export const paymentService = {
   getAll: () => api.get('/payments')
 };
 
-export default api;
+export const inquiryService = {
+  create: (data) => api.post('/inquiries', data),
+  getAll: () => api.get('/inquiries'),
+  getById: (id) => api.get(`/inquiries/${id}`),
+  getMyInquiries: () => api.get('/my-inquiries'),
+  getPropertyInquiries: (propertyId) => api.get(`/properties/${propertyId}/inquiries`),
+  updateStatus: (id, status) => api.put(`/inquiries/${id}`, { status })
+};
 
+export default api;

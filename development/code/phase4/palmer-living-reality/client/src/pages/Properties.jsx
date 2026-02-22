@@ -30,8 +30,8 @@ const Properties = () => {
 
       const response = await propertyService.getAll(params);
       setProperties(response.data);
-    } catch (error) {
-      console.error('Error fetching properties:', error);
+    } catch {
+      // Silently handle error - page will show empty state
     } finally {
       setLoading(false);
     }

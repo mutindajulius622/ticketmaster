@@ -62,8 +62,8 @@ export const AuthProvider = ({ children }) => {
     try {
       await api.post('/logout');
       setUser(null);
-    } catch (err) {
-      console.error('Logout error:', err);
+    } catch {
+      // Silent fail on logout
     }
   };
 
@@ -93,4 +93,3 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-

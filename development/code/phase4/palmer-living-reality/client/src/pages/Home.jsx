@@ -14,8 +14,7 @@ const Home = () => {
       try {
         const response = await propertyService.getAll({ for_rent: 'true' });
         setFeaturedProperties(response.data.slice(0, 6));
-      } catch (error) {
-        console.error('Error fetching properties:', error);
+      } catch {
         // Set empty array on error so page still renders
         setFeaturedProperties([]);
       } finally {

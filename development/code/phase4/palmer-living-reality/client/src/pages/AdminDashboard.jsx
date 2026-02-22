@@ -12,6 +12,11 @@ const AdminDashboard = () => {
   const [agreements, setAgreements] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Add padding for navbar
+  const pageStyle = {
+    paddingTop: 'calc(var(--navbar-height) + 2rem)'
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -27,8 +32,8 @@ const AdminDashboard = () => {
       setUsers(usersRes.data);
       setProperties(propertiesRes.data);
       setAgreements(agreementsRes.data);
-    } catch (error) {
-      console.error('Error fetching data:', error);
+    } catch {
+      // Silently handle error - page will show empty state
     } finally {
       setLoading(false);
     }
@@ -101,7 +106,7 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="container">
+    <div className="container" style={pageStyle}>
       <div className="page-header">
         <h1 className="page-title">Admin Dashboard</h1>
         <p className="page-subtitle">System administration and management</p>
@@ -137,7 +142,7 @@ const AdminDashboard = () => {
               style={{
                 padding: '1rem 2rem',
                 border: 'none',
-                background: activeTab === tab ? 'var(--primary-color)' : 'transparent',
+                background: activeTab === tab ? 'var(--primary-600)' : 'transparent',
                 color: activeTab === tab ? 'white' : 'var(--text-secondary)',
                 cursor: 'pointer',
                 fontWeight: 500,

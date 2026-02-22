@@ -23,8 +23,8 @@ const Dashboard = () => {
           const myProps = propertiesRes.data.filter(p => p.owner_id === user?.id);
           setMyProperties(myProps);
         }
-      } catch (error) {
-        console.error('Error fetching data:', error);
+      } catch {
+        // Silently handle error - page will show empty state
       } finally {
         setLoading(false);
       }

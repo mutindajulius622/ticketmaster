@@ -153,13 +153,29 @@ const PropertyDetail = () => {
           <Link to="/properties" className="btn btn-secondary">
             ← Back
           </Link>
-          {canRent && (
-            <button 
+          
+          {/* Inquiry Buttons */}
+          {property.is_for_rent && (
+            <Link 
+              to={`/inquiry/rent/${id}`}
               className="btn btn-primary"
-              onClick={() => setShowRentalModal(true)}
             >
-              Apply to Rent
-            </button>
+              🏠 Inquire to Rent
+            </Link>
+          )}
+          
+          {property.is_for_sale && (
+            <Link 
+              to={`/inquiry/sale/${id}`}
+              className="btn"
+              style={{ 
+                background: 'var(--accent-500)', 
+                color: 'white',
+                border: 'none'
+              }}
+            >
+              💰 Inquire to Buy
+            </Link>
           )}
         </div>
       </div>
