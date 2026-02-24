@@ -74,6 +74,21 @@ const HomePage = () => {
           </div>
         </section>
 
+        {/* Promoted Section */}
+        <section className="mb-12">
+          <h2 className="text-3xl font-bold mb-6">Promoted Events</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Placeholder for promoted events */}
+            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+              <img src="https://via.placeholder.com/300x150?text=Promoted+Event" alt="Promoted Event" className="w-full h-36 object-cover" />
+              <div className="p-4">
+                <h3 className="font-bold text-lg">Special Offer</h3>
+                <p className="text-sm text-gray-600">Venue Name</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Category Filter */}
         <div className="mb-12">
           <h2 className="text-3xl font-bold mb-6">Categories</h2>
