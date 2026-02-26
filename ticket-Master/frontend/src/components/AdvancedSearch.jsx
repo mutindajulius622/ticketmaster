@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaSearch, FaCalendar, FaMapMarkerAlt, FaTags, FaSliders } from 'react-icons/fa';
+import { FaSearch, FaCalendar, FaMapMarkerAlt, FaTags, FaFilter } from 'react-icons/fa';
 import { useDispatch } from 'react-redux';
 import { fetchEvents } from '../redux/slices/eventsSlice';
 
@@ -103,7 +103,7 @@ const AdvancedSearch = ({ onSearch }) => {
           onClick={() => setShowFilters(!showFilters)}
           className="border border-gray-300 hover:bg-gray-50 px-4 py-3 rounded-lg flex items-center gap-2"
         >
-          <FaSliders /> Filters
+          <FaFilter /> Filters
         </button>
       </div>
 

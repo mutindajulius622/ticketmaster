@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { FaUser, FaEnvelope, FaPhone, FaBadge } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaPhone, FaIdBadge } from 'react-icons/fa';
 
 const ProfilePage = () => {
   const { user } = useSelector((state) => state.auth);
@@ -45,7 +45,7 @@ const ProfilePage = () => {
             )}
 
             <div className="flex items-center gap-4">
-              <FaBadge className="text-blue-600 text-xl" />
+              <FaIdBadge className="text-blue-600 text-xl" />
               <div>
                 <p className="text-sm text-gray-600">Account Status</p>
                 <p className="font-semibold capitalize">{user.status}</p>

@@ -35,7 +35,7 @@ const SeatSelection = () => {
       <h2 className="text-2xl font-bold mb-4">Select Your Seats</h2>
       {!eventId && (
         <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
-          <p className="text-yellow-800">No `eventId` provided. Pass `?eventId=<id>` in the URL.</p>
+          <p className="text-yellow-800">No `eventId` provided. Pass `?eventId={'<id>'}` in the URL.</p>
         </div>
       )}
       <SeatMap venueId={venueId} onReserve={handleReserve} />

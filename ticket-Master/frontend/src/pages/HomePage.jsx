@@ -95,11 +95,10 @@ const HomePage = () => {
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => handleCategoryFilter('')}
-              className={`px-4 py-2 rounded-full font-semibold transition ${
-                !selectedCategory
+              className={`px-4 py-2 rounded-full font-semibold transition ${!selectedCategory
                   ? 'bg-blue-600 text-white'
                   : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-              }`}
+                }`}
             >
               All
             </button>
@@ -107,11 +106,10 @@ const HomePage = () => {
               <button
                 key={cat}
                 onClick={() => handleCategoryFilter(cat)}
-                className={`px-4 py-2 rounded-full font-semibold transition capitalize ${
-                  selectedCategory === cat
+                className={`px-4 py-2 rounded-full font-semibold transition capitalize ${selectedCategory === cat
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-                }`}
+                  }`}
               >
                 {cat}
               </button>
@@ -184,18 +182,17 @@ const HomePage = () => {
               <button
                 key={page}
                 onClick={() => dispatch(fetchEvents({ page, ...filters }))}
-                className={`px-4 py-2 rounded transition ${
-                  page === pagination.page
+                className={`px-4 py-2 rounded transition ${page === pagination.page
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-                }`}
+                  }`}
               >
                 {page}
               </button>
             ))}
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 };
