@@ -27,11 +27,12 @@ class User(BaseModel):
     __tablename__ = 'users'
     
     class Role:
+        SUPER_ADMIN = 'super_admin'
         ADMIN = 'admin'
         ORGANIZER = 'organizer'
         ATTENDEE = 'attendee'
         
-        VALID_ROLES = [ADMIN, ORGANIZER, ATTENDEE]
+        VALID_ROLES = [SUPER_ADMIN, ADMIN, ORGANIZER, ATTENDEE]
     
     class Status:
         ACTIVE = 'active'

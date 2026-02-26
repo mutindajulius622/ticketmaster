@@ -7,13 +7,25 @@ admin_bp = Blueprint('admin', __name__, url_prefix='/api/admin')
 
 
 def admin_required(fn):
-    """Decorator to check if user is admin"""
+    """Decorator to check if user is admin or super admin"""
     from functools import wraps
     @wraps(fn)
     def decorated_function(*args, **kwargs):
         claims = get_jwt()
-        if claims.get('role') != User.Role.ADMIN:
+        if claims.get('role') not in [User.Role.ADMIN, User.Role.SUPER_ADMIN]:
             return jsonify({'error': 'Admin access required'}), 403
+        return fn(*args, **kwargs)
+    return decorated_function
+
+
+def super_admin_required(fn):
+    """Decorator to check if user is super admin"""
+    from functools import wraps
+    @wraps(fn)
+    def decorated_function(*args, **kwargs):
+        claims = get_jwt()
+        if claims.get('role') != User.Role.SUPER_ADMIN:
+            return jsonify({'error': 'Super Admin access required'}), 403
         return fn(*args, **kwargs)
     return decorated_function
 
@@ -115,6 +127,69 @@ def update_user_status(user_id):
             'user': user.to_dict()
         }), 200
     
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
+@admin_bp.route('/users/<user_id>/promote', methods=['POST'])
+@jwt_required()
+@super_admin_required
+def promote_user_to_admin(user_id):
+    """Promote a user to Admin (Super Admin only)"""
+    try:
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        
+        user.role = User.Role.ADMIN
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'User promoted to Admin successfully',
+            'user': user.to_dict()
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
+@admin_bp.route('/users/<user_id>/demote', methods=['POST'])
+@jwt_required()
+@super_admin_required
+def demote_admin(user_id):
+    """Demote an Admin to Attendee (Super Admin only)"""
+    try:
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        
+        user.role = User.Role.ATTENDEE
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Admin demoted to Attendee successfully',
+            'user': user.to_dict()
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
+@admin_bp.route('/users/<user_id>', methods=['DELETE'])
+@jwt_required()
+@super_admin_required
+def delete_user(user_id):
+    """Delete a user (Super Admin only)"""
+    try:
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        
+        db.session.delete(user)
+        db.session.commit()
+        
+        return jsonify({'message': 'User deleted successfully'}), 200
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500

@@ -48,7 +48,7 @@ const Navigation = () => {
             >
               Saved Events
             </Link>
-            {user?.role === 'admin' && (
+            {(user?.role === 'admin' || user?.role === 'super_admin') && (
               <Link
                 to="/admin"
                 className={`hover:text-blue-200 transition ${isActive('/admin') ? 'text-blue-200 border-b-2' : ''}`}
@@ -113,7 +113,7 @@ const Navigation = () => {
             >
               Saved Events
             </Link>
-            {user?.role === 'admin' && (
+            {(user?.role === 'admin' || user?.role === 'super_admin') && (
               <Link
                 to="/admin"
                 className="block px-4 py-2 hover:bg-blue-700 rounded"

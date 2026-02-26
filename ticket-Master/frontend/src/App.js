@@ -16,6 +16,7 @@ import AdminPage from './pages/AdminPage';
 import SavedEventsPage from './pages/SavedEventsPage';
 import SearchPage from './pages/SearchPage';
 import SeatSelection from './pages/SeatSelection';
+import CreateEventPage from './pages/CreateEventPage';
 
 // Components
 import ProtectedRoute from './components/ProtectedRoute';
@@ -36,7 +37,7 @@ function App() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       {isAuthenticated && <Navigation />}
-      
+
       <main className="flex-1">
         <Routes>
           {/* Public Routes */}
@@ -87,6 +88,14 @@ function App() {
             element={
               <ProtectedRoute requiredRole="admin">
                 <AdminPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/create-event"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <CreateEventPage />
               </ProtectedRoute>
             }
           />

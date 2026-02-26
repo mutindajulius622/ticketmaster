@@ -6,6 +6,7 @@ import paymentsReducer from './slices/paymentsSlice';
 import uiReducer from './slices/uiSlice';
 import searchReducer from './slices/searchSlice';
 import selectedSeatsReducer from './slices/selectedSeatsSlice';
+import usersReducer from './slices/usersSlice';
 
 const store = configureStore({
   reducer: {
@@ -16,6 +17,7 @@ const store = configureStore({
     ui: uiReducer,
     search: searchReducer,
     selectedSeats: selectedSeatsReducer,
+    users: usersReducer,
   },
 });
 
