@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { login } from '../redux/slices/authSlice';
+import { GoogleLogin } from '@react-oauth/google';
+import { login, googleLogin } from '../redux/slices/authSlice';
 import { toast } from 'react-toastify';
 import { FaEnvelope, FaLock, FaSpinner } from 'react-icons/fa';
 
@@ -11,10 +12,24 @@ const LoginPage = () => {
     password: '',
   });
   const [showPassword, setShowPassword] = useState(false);
-  
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading, error } = useSelector((state) => state.auth);
+
+  const handleGoogleSuccess = async (response) => {
+    const result = await dispatch(googleLogin(response.credential));
+    if (result.payload) {
+      toast.success('Login successful with Google!');
+      navigate('/dashboard');
+    } else {
+      toast.error('Google login failed');
+    }
+  };
+
+  const handleGoogleError = () => {
+    toast.error('Google Sign In failed. Please try again.');
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -26,7 +41,7 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!formData.email || !formData.password) {
       toast.error('Please fill in all fields');
       return;
@@ -99,6 +114,28 @@ const LoginPage = () => {
             <span>{loading ? 'Signing in...' : 'Sign In'}</span>
           </button>
         </form>
+
+        <div className="mt-6">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-gray-500">Or continue with</span>
+            </div>
+          </div>
+
+          <div className="mt-6 flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              useOneTap
+              theme="outline"
+              size="large"
+              shape="pill"
+            />
+          </div>
+        </div>
 
         {/* Links */}
         <div className="mt-6 text-center space-y-2">

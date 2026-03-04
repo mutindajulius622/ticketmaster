@@ -49,6 +49,18 @@ export const cancelTicket = createAsyncThunk(
   }
 );
 
+export const transferTicket = createAsyncThunk(
+  'tickets/transferTicket',
+  async ({ ticketId, transferData }, { rejectWithValue }) => {
+    try {
+      const response = await ticketService.transferTicket(ticketId, transferData);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to transfer ticket');
+    }
+  }
+);
+
 const ticketsSlice = createSlice({
   name: 'tickets',
   initialState,
@@ -80,6 +92,18 @@ const ticketsSlice = createSlice({
         if (index !== -1) {
           state.tickets[index] = action.payload.ticket;
         }
+      })
+      .addCase(transferTicket.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(transferTicket.fulfilled, (state, action) => {
+        state.loading = false;
+        // Remove the ticket from current user's list as it's been transferred
+        state.tickets = state.tickets.filter(t => t.id !== action.payload.ticket.id);
+      })
+      .addCase(transferTicket.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });

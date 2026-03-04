@@ -5,18 +5,36 @@ import { register } from '../redux/slices/authSlice';
 import { toast } from 'react-toastify';
 import { FaUser, FaEnvelope, FaLock, FaPhone, FaSpinner } from 'react-icons/fa';
 
+const countryCodes = [
+  { code: '+254', country: 'Kenya' },
+  { code: '+1', country: 'USA/Canada' },
+  { code: '+44', country: 'UK' },
+  { code: '+234', country: 'Nigeria' },
+  { code: '+255', country: 'Tanzania' },
+  { code: '+256', country: 'Uganda' },
+  { code: '+27', country: 'South Africa' },
+  { code: '+91', country: 'India' },
+  { code: '+61', country: 'Australia' },
+  { code: '+49', country: 'Germany' },
+  { code: '+33', country: 'France' },
+  { code: '+81', country: 'Japan' },
+  { code: '+86', country: 'China' },
+  { code: '+971', country: 'UAE' },
+];
+
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
     email: '',
+    country_code: '+254',
     phone_number: '',
     password: '',
     confirmPassword: '',
     role: 'attendee',
   });
   const [showPassword, setShowPassword] = useState(false);
-  
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading, error } = useSelector((state) => state.auth);
@@ -31,7 +49,7 @@ const RegisterPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!formData.first_name || !formData.last_name || !formData.email || !formData.password) {
       toast.error('Please fill in all required fields');
       return;
@@ -47,11 +65,16 @@ const RegisterPage = () => {
       return;
     }
 
+    // Combine country code and phone number
+    const fullPhoneNumber = formData.phone_number
+      ? `${formData.country_code}${formData.phone_number.replace(/^\+/, '')}`
+      : '';
+
     const registerData = {
       first_name: formData.first_name,
       last_name: formData.last_name,
       email: formData.email,
-      phone_number: formData.phone_number,
+      phone_number: fullPhoneNumber,
       password: formData.password,
       role: formData.role,
     };
@@ -83,6 +106,7 @@ const RegisterPage = () => {
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                 placeholder="John"
+                required
               />
             </div>
             <div>
@@ -94,6 +118,7 @@ const RegisterPage = () => {
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                 placeholder="Doe"
+                required
               />
             </div>
           </div>
@@ -111,6 +136,7 @@ const RegisterPage = () => {
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
               placeholder="your@email.com"
+              required
             />
           </div>
 
@@ -118,16 +144,30 @@ const RegisterPage = () => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               <FaPhone className="inline mr-2" />
-              Phone Number (Optional)
+              Phone Number
             </label>
-            <input
-              type="tel"
-              name="phone_number"
-              value={formData.phone_number}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              placeholder="+254..."
-            />
+            <div className="flex space-x-2">
+              <select
+                name="country_code"
+                value={formData.country_code}
+                onChange={handleChange}
+                className="w-32 px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white text-sm"
+              >
+                {countryCodes.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.code} ({c.country})
+                  </option>
+                ))}
+              </select>
+              <input
+                type="tel"
+                name="phone_number"
+                value={formData.phone_number}
+                onChange={handleChange}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                placeholder="712345678"
+              />
+            </div>
           </div>
 
           {/* Role */}
@@ -137,7 +177,7 @@ const RegisterPage = () => {
               name="role"
               value={formData.role}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white"
             >
               <option value="attendee">Attendee</option>
               <option value="organizer">Event Organizer</option>
@@ -150,14 +190,24 @@ const RegisterPage = () => {
               <FaLock className="inline mr-2" />
               Password
             </label>
-            <input
-              type={showPassword ? 'text' : 'password'}
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              placeholder="••••••••"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                placeholder="••••••••"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-2.5 text-gray-600"
+              >
+                {showPassword ? '🙈' : '👁️'}
+              </button>
+            </div>
           </div>
 
           {/* Confirm Password */}
@@ -171,14 +221,8 @@ const RegisterPage = () => {
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                 placeholder="••••••••"
+                required
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-2.5 text-gray-600"
-              >
-                {showPassword ? '🙈' : '👁️'}
-              </button>
             </div>
           </div>
 

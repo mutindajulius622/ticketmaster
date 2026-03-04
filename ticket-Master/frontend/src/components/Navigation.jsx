@@ -48,7 +48,7 @@ const Navigation = () => {
             >
               Saved Events
             </Link>
-            {(user?.role === 'admin' || user?.role === 'super_admin') && (
+            {user && (user.role === 'admin' || user.role === 'super_admin') && (
               <Link
                 to="/admin"
                 className={`hover:text-blue-200 transition ${isActive('/admin') ? 'text-blue-200 border-b-2' : ''}`}
@@ -56,6 +56,12 @@ const Navigation = () => {
                 Admin
               </Link>
             )}
+            <Link
+              to="/quick-ticket"
+              className={`hover:text-blue-200 transition ${isActive('/quick-ticket') ? 'text-blue-200 border-b-2' : ''}`}
+            >
+              Quick Ticket
+            </Link>
           </div>
 
           {/* User Menu */}
@@ -123,6 +129,13 @@ const Navigation = () => {
               </Link>
             )}
             <Link
+              to="/quick-ticket"
+              className="block px-4 py-2 hover:bg-blue-700 rounded"
+              onClick={() => setIsOpen(false)}
+            >
+              Quick Ticket
+            </Link>
+            <Link
               to="/profile"
               className="block px-4 py-2 hover:bg-blue-700 rounded"
               onClick={() => setIsOpen(false)}
@@ -139,7 +152,7 @@ const Navigation = () => {
           </div>
         )}
       </div>
-    </nav>
+    </nav >
   );
 };
 

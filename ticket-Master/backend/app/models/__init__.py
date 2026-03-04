@@ -153,10 +153,11 @@ class TicketType(BaseModel):
     
     class Type:
         EARLY_BIRD = 'early_bird'
+        VVIP = 'vvip'
         VIP = 'vip'
         REGULAR = 'regular'
         
-        VALID_TYPES = [EARLY_BIRD, VIP, REGULAR]
+        VALID_TYPES = [EARLY_BIRD, VVIP, VIP, REGULAR]
     
     event_id = db.Column(db.String(36), db.ForeignKey('events.id'), nullable=False)
     name = db.Column(db.String(100), nullable=False)
@@ -219,8 +220,18 @@ class Ticket(BaseModel):
         base_dict = super().to_dict()
         base_dict.update({
             'event_id': self.event_id,
+            'event_title': self.event.title if self.event else None,
+            'event_date': self.event.start_date.isoformat() if self.event and self.event.start_date else None,
+            'event_location': self.event.location if self.event else None,
             'ticket_type_id': self.ticket_type_id,
+            'ticket_type_name': self.ticket_type.name if self.ticket_type else None,
+            'ticket_type_tier': self.ticket_type.type if self.ticket_type else None,
             'seat_id': self.seat_id,
+            'seat_details': {
+                'section': self.seat.section.name if self.seat and self.seat.section else None,
+                'row': self.seat.row if self.seat else None,
+                'seat_number': self.seat.seat_number if self.seat else None
+            } if self.seat else None,
             'attendee_id': self.attendee_id,
             'payment_id': self.payment_id,
             'ticket_number': self.ticket_number,
@@ -230,6 +241,8 @@ class Ticket(BaseModel):
             'used_at': self.used_at.isoformat() if self.used_at else None,
         })
         return base_dict
+
+
 
 
 class Payment(BaseModel):

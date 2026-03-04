@@ -1,7 +1,8 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
-from app.models import db, User, Event, Payment, Ticket
+from app.models import db, User, Event, Payment, Ticket, Venue, VenueSection, Seat, TicketType
 from datetime import datetime, timedelta
+import os, uuid, base64
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/api/admin')
 
@@ -378,4 +379,188 @@ def revenue_report():
         }), 200
     
     except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+# ──────────────────────────────────────────────
+# ADMIN EVENT CREATION (full pipeline)
+# ──────────────────────────────────────────────
+
+@admin_bp.route('/venues', methods=['GET'])
+@jwt_required()
+@admin_required
+def list_venues():
+    """List all venues (Admin)"""
+    venues = Venue.query.all()
+    return jsonify({'venues': [v.to_dict() for v in venues]}), 200
+
+
+@admin_bp.route('/upload-image', methods=['POST'])
+@jwt_required()
+@admin_required
+def upload_image():
+    """Upload event image (base64) – stores file locally and returns path"""
+    try:
+        data = request.get_json()
+        image_b64 = data.get('image')  # data:image/png;base64,.....
+        if not image_b64:
+            return jsonify({'error': 'No image provided'}), 400
+
+        # Strip the data-URL prefix if present
+        if ',' in image_b64:
+            header, image_b64 = image_b64.split(',', 1)
+            ext = header.split('/')[1].split(';')[0] if '/' in header else 'jpg'
+        else:
+            ext = 'jpg'
+
+        filename = f"event_{uuid.uuid4().hex}.{ext}"
+        upload_dir = os.path.join(current_app.root_path, '..', 'uploads')
+        os.makedirs(upload_dir, exist_ok=True)
+        filepath = os.path.join(upload_dir, filename)
+
+        with open(filepath, 'wb') as f:
+            f.write(base64.b64decode(image_b64))
+
+        # Return a URL the frontend can use
+        image_url = f"{os.environ.get('API_URL', 'http://localhost:5000')}/uploads/{filename}"
+        return jsonify({'image_url': image_url}), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@admin_bp.route('/events/create-full', methods=['POST'])
+@jwt_required()
+@admin_required
+def create_full_event():
+    """
+    One-shot endpoint: creates Venue (or reuses existing), VenueSections,
+    Seats, Event, and TicketTypes (VVIP / VIP / Regular).
+
+    Expected JSON body:
+    {
+      "event": { title, description, category, location, start_date, end_date, image_url, tags },
+      "venue": { name, address, city, state, country, reuse_id (optional) },
+      "sections": [
+        { name, ticket_type, rows, seats_per_row, color }
+      ],
+      "ticket_types": [
+        { name, type, price, description }
+      ]
+    }
+    """
+    try:
+        current_user_id = get_jwt_identity()
+        data = request.get_json()
+
+        ev = data.get('event', {})
+        vn = data.get('venue', {})
+        sections_data = data.get('sections', [])
+        ticket_types_data = data.get('ticket_types', [])
+
+        # ── Venue ──
+        venue = None
+        if vn.get('reuse_id'):
+            venue = Venue.query.get(vn['reuse_id'])
+        if not venue:
+            total_capacity = sum(
+                int(s.get('rows', 0)) * int(s.get('seats_per_row', 0))
+                for s in sections_data
+            ) or 1000
+            venue = Venue(
+                name=vn.get('name', 'Main Venue'),
+                description=vn.get('description', ''),
+                address=vn.get('address', ''),
+                city=vn.get('city', ''),
+                state=vn.get('state', ''),
+                country=vn.get('country', ''),
+                capacity=total_capacity,
+            )
+            db.session.add(venue)
+            db.session.flush()
+
+        # ── Event ──
+        start_date = datetime.fromisoformat(ev['start_date'].replace('Z', '+00:00').replace('+00:00', ''))
+        end_date   = datetime.fromisoformat(ev['end_date'].replace('Z', '+00:00').replace('+00:00', ''))
+
+        event = Event(
+            title=ev['title'],
+            description=ev.get('description', ''),
+            category=ev.get('category', 'other'),
+            location=ev.get('location', venue.city),
+            start_date=start_date,
+            end_date=end_date,
+            image_url=ev.get('image_url', ''),
+            tags=','.join(ev.get('tags', [])) if isinstance(ev.get('tags'), list) else ev.get('tags', ''),
+            status=Event.Status.PUBLISHED,
+            organizer_id=current_user_id,
+            venue_id=venue.id,
+            is_featured=ev.get('is_featured', False),
+        )
+        db.session.add(event)
+        db.session.flush()
+
+        # ── Sections + Seats ──
+        TIER_COLORS = {
+            'vvip': '#FFD700',   # gold
+            'vip':  '#026CDF',   # blue
+            'regular': '#6B7280' # gray
+        }
+        for sec in sections_data:
+            rows = int(sec.get('rows', 5))
+            spr  = int(sec.get('seats_per_row', 10))
+            tier = sec.get('ticket_type', 'regular').lower()
+            color = sec.get('color') or TIER_COLORS.get(tier, '#6B7280')
+
+            section = VenueSection(
+                venue_id=venue.id,
+                name=sec.get('name', f"Section {tier.upper()}"),
+                capacity=rows * spr,
+                rows=rows,
+                seats_per_row=spr,
+                color=color,
+            )
+            db.session.add(section)
+            db.session.flush()
+
+            for row in range(1, rows + 1):
+                for seat_num in range(1, spr + 1):
+                    db.session.add(Seat(
+                        section_id=section.id,
+                        row=row,
+                        seat_number=seat_num,
+                        status=Seat.Status.AVAILABLE,
+                    ))
+
+        # ── Ticket Types ──
+        for tt in ticket_types_data:
+            total_qty = sum(
+                int(s.get('rows', 5)) * int(s.get('seats_per_row', 10))
+                for s in sections_data
+                if s.get('ticket_type', '').lower() == tt.get('type', '').lower()
+            ) or int(tt.get('quantity', 100))
+
+            db.session.add(TicketType(
+                event_id=event.id,
+                name=tt['name'],
+                type=tt['type'],
+                price=float(tt['price']),
+                quantity=total_qty,
+                sold=0,
+                description=tt.get('description', ''),
+            ))
+
+        db.session.commit()
+
+        return jsonify({
+            'message': 'Event created successfully',
+            'event': event.to_dict(),
+            'venue': venue.to_dict(),
+        }), 201
+
+    except KeyError as e:
+        db.session.rollback()
+        return jsonify({'error': f'Missing required field: {e}'}), 400
+    except Exception as e:
+        db.session.rollback()
         return jsonify({'error': str(e)}), 500

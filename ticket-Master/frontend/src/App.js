@@ -17,6 +17,7 @@ import SavedEventsPage from './pages/SavedEventsPage';
 import SearchPage from './pages/SearchPage';
 import SeatSelection from './pages/SeatSelection';
 import CreateEventPage from './pages/CreateEventPage';
+import QuickTicketPage from './pages/QuickTicketPage';
 
 // Components
 import ProtectedRoute from './components/ProtectedRoute';
@@ -47,6 +48,7 @@ function App() {
           <Route path="/search" element={<SearchPage />} />
           <Route path="/venues/:venueId/seatmap" element={<SeatSelection />} />
           <Route path="/events/:eventId" element={<EventDetailPage />} />
+          <Route path="/quick-ticket" element={<QuickTicketPage />} />
 
           {/* Protected Routes */}
           <Route

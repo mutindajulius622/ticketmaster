@@ -70,16 +70,22 @@ const SeatMap = ({ venueId, onReserve }) => {
         <div key={sec.section.id} className="bg-white p-4 rounded-lg shadow">
           <h4 className="font-semibold mb-3">{sec.section.name}</h4>
           <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${sec.section.seats_per_row}, 1fr)` }}>
-                {sec.seats.map((seat) => (
-                  <Seat key={seat.id} seat={seat} onToggle={toggleSeat} />
-                ))}
+            {sec.seats.map((seat) => (
+              <Seat key={seat.id} seat={seat} onToggle={toggleSeat} />
+            ))}
           </div>
         </div>
       ))}
 
       <div className="flex justify-end gap-2">
-        <button onClick={() => setSelected([])} className="px-4 py-2 border rounded">Clear</button>
-        <button onClick={handleReserve} className="px-4 py-2 bg-blue-600 text-white rounded">Reserve Selected ({selected.length})</button>
+        <button onClick={() => dispatch(clearSelectedSeats())} className="px-4 py-2 border rounded">Clear</button>
+        <button
+          onClick={handleReserve}
+          disabled={!selected.length && !localSelected.length}
+          className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
+        >
+          Reserve Selected ({selected.length || localSelected.length})
+        </button>
       </div>
     </div>
   );

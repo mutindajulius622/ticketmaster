@@ -351,3 +351,64 @@ def create_review(event_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
+
+
+@events_bp.route('/<event_id>/save', methods=['POST'])
+@jwt_required()
+def save_event(event_id):
+    """Save/Favorite an event"""
+    try:
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+        event = Event.query.get(event_id)
+        
+        if not event:
+            return jsonify({'error': 'Event not found'}), 404
+        
+        if event in user.saved_events:
+            return jsonify({'message': 'Event already saved'}), 200
+            
+        user.saved_events.append(event)
+        db.session.commit()
+        
+        return jsonify({'message': 'Event saved to favorites'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
+@events_bp.route('/<event_id>/unsave', methods=['DELETE'])
+@jwt_required()
+def unsave_event(event_id):
+    """Remove an event from favorites"""
+    try:
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+        event = Event.query.get(event_id)
+        
+        if not event:
+            return jsonify({'error': 'Event not found'}), 404
+        
+        if event in user.saved_events:
+            user.saved_events.remove(event)
+            db.session.commit()
+            
+        return jsonify({'message': 'Event removed from favorites'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
+@events_bp.route('/saved', methods=['GET'])
+@jwt_required()
+def list_saved_events():
+    """List current user's saved events"""
+    try:
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+        
+        return jsonify({
+            'events': [e.to_dict() for e in user.saved_events]
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

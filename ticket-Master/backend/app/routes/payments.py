@@ -208,6 +208,17 @@ def capture_paypal_order():
                 event.total_attendees += len(tickets)
             
             db.session.commit()
+
+            # Send emails to the user for each ticket
+            try:
+                from app.utils.email import send_ticket_email
+                user = User.query.get(current_user_id)
+                for ticket in tickets:
+                    ticket_dict = ticket.to_dict()
+                    event_dict = ticket.event.to_dict() if ticket.event else {}
+                    send_ticket_email(user.email, ticket_dict, event_dict)
+            except Exception as email_err:
+                print(f"[PURCHASE EMAIL ERROR] {email_err}")
             
             return jsonify({
                 'message': 'Payment captured successfully',

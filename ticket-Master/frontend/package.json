@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@paypal/checkout-server-sdk": "^1.0.1",
+    "@react-oauth/google": "^0.13.4",
     "@reduxjs/toolkit": "^1.9.5",
     "ajv": "^8.18.0",
     "axios": "^1.4.0",

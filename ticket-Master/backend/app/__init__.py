@@ -53,10 +53,19 @@ def create_app(config_name=None):
     def health_check():
         return jsonify({'status': 'healthy', 'service': 'ticket-master-api'}), 200
     
+    # Serve uploaded images
+    upload_dir = os.path.join(os.path.dirname(app.root_path), 'uploads')
+    os.makedirs(upload_dir, exist_ok=True)
+
+    from flask import send_from_directory
+    @app.route('/uploads/<path:filename>')
+    def serve_upload(filename):
+        return send_from_directory(upload_dir, filename)
+
     # Context for database operations
     with app.app_context():
         db.create_all()
-    
+
     return app
 
 

@@ -12,6 +12,7 @@ const initialState = {
     total: 0,
     pages: 0,
   },
+  savedEvents: [],
   filters: {
     category: null,
     location: null,
@@ -68,6 +69,34 @@ export const updateEvent = createAsyncThunk(
   }
 );
 
+export const fetchSavedEvents = createAsyncThunk(
+  'events/fetchSavedEvents',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await eventService.getSavedEvents();
+      return response.events;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to fetch saved events');
+    }
+  }
+);
+
+export const toggleSaveEvent = createAsyncThunk(
+  'events/toggleSaveEvent',
+  async ({ eventId, isSaved }, { rejectWithValue }) => {
+    try {
+      if (isSaved) {
+        await eventService.unsaveEvent(eventId);
+      } else {
+        await eventService.saveEvent(eventId);
+      }
+      return { eventId, isSaved: !isSaved };
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.error || 'Action failed');
+    }
+  }
+);
+
 const eventsSlice = createSlice({
   name: 'events',
   initialState,
@@ -116,6 +145,18 @@ const eventsSlice = createSlice({
         const index = state.events.findIndex(e => e.id === action.payload.id);
         if (index !== -1) {
           state.events[index] = action.payload;
+        }
+      })
+      .addCase(fetchSavedEvents.fulfilled, (state, action) => {
+        state.savedEvents = action.payload;
+      })
+      .addCase(toggleSaveEvent.fulfilled, (state, action) => {
+        const { eventId, isSaved } = action.payload;
+        if (isSaved) {
+          // If we just saved it, we might want to refresh savedEvents list
+        } else {
+          // If we unsaved it, remove from list
+          state.savedEvents = state.savedEvents.filter(e => e.id !== eventId);
         }
       });
   },

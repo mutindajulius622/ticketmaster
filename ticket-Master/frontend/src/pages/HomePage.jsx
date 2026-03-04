@@ -1,19 +1,34 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchEvents } from '../redux/slices/eventsSlice';
-import { setFilters } from '../redux/slices/eventsSlice';
+import { fetchEvents, setFilters, fetchSavedEvents, toggleSaveEvent } from '../redux/slices/eventsSlice';
 import { Link } from 'react-router-dom';
-import { FaSearch, FaMapMarkerAlt, FaCalendar, FaStar, FaSpinner } from 'react-icons/fa';
+import { FaSearch, FaMapMarkerAlt, FaCalendar, FaStar, FaSpinner, FaHeart, FaRegHeart } from 'react-icons/fa';
+import { toast } from 'react-toastify';
 
 const HomePage = () => {
   const dispatch = useDispatch();
-  const { events, loading, filters, pagination } = useSelector((state) => state.events);
+  const { events, loading, filters, pagination, savedEvents } = useSelector((state) => state.events);
+  const { isAuthenticated } = useSelector((state) => state.auth);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
 
   useEffect(() => {
     dispatch(fetchEvents({ page: 1, ...filters }));
-  }, [dispatch]);
+    if (isAuthenticated) {
+      dispatch(fetchSavedEvents());
+    }
+  }, [dispatch, isAuthenticated]);
+
+  const toggleSave = async (e, eventId) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      toast.info('Please log in to save events');
+      return;
+    }
+    const isAlreadySaved = savedEvents.some(se => se.id === eventId);
+    await dispatch(toggleSaveEvent({ eventId, isSaved: isAlreadySaved }));
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -96,8 +111,8 @@ const HomePage = () => {
             <button
               onClick={() => handleCategoryFilter('')}
               className={`px-4 py-2 rounded-full font-semibold transition ${!selectedCategory
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
                 }`}
             >
               All
@@ -107,8 +122,8 @@ const HomePage = () => {
                 key={cat}
                 onClick={() => handleCategoryFilter(cat)}
                 className={`px-4 py-2 rounded-full font-semibold transition capitalize ${selectedCategory === cat
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
                   }`}
               >
                 {cat}
@@ -138,12 +153,22 @@ const HomePage = () => {
                   <img
                     src={event.image_url || 'https://via.placeholder.com/300x200?text=Event'}
                     alt={event.title}
-                    className="w-full h-48 object-cover"
+                    className="w-full h-48 object-cover translate-y-0 group-hover:scale-110 transition-transform duration-500"
                   />
-                  <div className="absolute top-2 right-2 bg-white p-1.5 rounded-full shadow-md">
-                    <div className="flex items-center gap-1">
-                      <FaStar className="text-yellow-500" />
-                      <span className="text-sm font-bold">{event.average_rating.toFixed(1)}</span>
+                  <div className="absolute top-2 right-2 flex flex-col gap-2">
+                    <button
+                      onClick={(e) => toggleSave(e, event.id)}
+                      className="bg-white/90 p-2 rounded-full shadow-md text-gray-700 hover:text-red-500 transition-colors"
+                    >
+                      {savedEvents.some(se => se.id === event.id) ? (
+                        <FaHeart className="text-red-500" />
+                      ) : (
+                        <FaRegHeart />
+                      )}
+                    </button>
+                    <div className="bg-white/90 px-2 py-1 rounded-full shadow-md flex items-center gap-1">
+                      <FaStar className="text-yellow-500 text-sm" />
+                      <span className="text-xs font-bold text-gray-800">{event.average_rating.toFixed(1)}</span>
                     </div>
                   </div>
                 </div>
@@ -183,8 +208,8 @@ const HomePage = () => {
                 key={page}
                 onClick={() => dispatch(fetchEvents({ page, ...filters }))}
                 className={`px-4 py-2 rounded transition ${page === pagination.page
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
                   }`}
               >
                 {page}

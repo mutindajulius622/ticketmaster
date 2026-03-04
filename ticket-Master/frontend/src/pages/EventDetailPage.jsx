@@ -1,20 +1,32 @@
 import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchEventDetail } from '../redux/slices/eventsSlice';
+import { fetchEventDetail, toggleSaveEvent, fetchSavedEvents } from '../redux/slices/eventsSlice';
 import { toast } from 'react-toastify';
-import { FaMapMarkerAlt, FaCalendar, FaStar, FaUsers, FaTicketAlt, FaSpinner } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaCalendar, FaStar, FaUsers, FaTicketAlt, FaSpinner, FaHeart, FaRegHeart } from 'react-icons/fa';
 
 const EventDetailPage = () => {
   const { eventId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { currentEvent, loading } = useSelector((state) => state.events);
+  const { currentEvent, loading, savedEvents } = useSelector((state) => state.events);
   const { isAuthenticated } = useSelector((state) => state.auth);
 
   useEffect(() => {
     dispatch(fetchEventDetail(eventId));
-  }, [eventId, dispatch]);
+    if (isAuthenticated) {
+      dispatch(fetchSavedEvents());
+    }
+  }, [eventId, dispatch, isAuthenticated]);
+
+  const toggleSave = async () => {
+    if (!isAuthenticated) {
+      toast.info('Please log in to save events');
+      return;
+    }
+    const isSaved = savedEvents.some(se => se.id === currentEvent.id);
+    await dispatch(toggleSaveEvent({ eventId: currentEvent.id, isSaved }));
+  };
 
   const handleBookTicket = (ticketTypeId) => {
     if (!isAuthenticated) {
@@ -46,14 +58,30 @@ const EventDetailPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Back Button */}
-        <button
-          onClick={() => navigate('/')}
-          className="mb-6 text-blue-600 hover:text-blue-800 font-semibold"
-        >
-          ← Back to Events
-        </button>
+        <div className="flex justify-between items-center mb-6">
+          <button
+            onClick={() => navigate('/')}
+            className="text-blue-600 hover:text-blue-800 font-semibold"
+          >
+            ← Back to Events
+          </button>
 
+          {currentEvent && (
+            <button
+              onClick={toggleSave}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${savedEvents.some(se => se.id === currentEvent.id)
+                ? 'bg-red-50 text-red-500 border border-red-200'
+                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                }`}
+            >
+              {savedEvents.some(se => se.id === currentEvent.id) ? (
+                <><FaHeart /> Saved to Favorites</>
+              ) : (
+                <><FaRegHeart /> Save to Favorites</>
+              )}
+            </button>
+          )}
+        </div>
         {/* Event Header */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Main Content */}
@@ -66,7 +94,7 @@ const EventDetailPage = () => {
 
             <div className="bg-white rounded-lg shadow p-6 mb-6">
               <h1 className="text-3xl font-bold mb-2">{event.title}</h1>
-              
+
               <div className="flex items-center gap-4 mb-6 pb-6 border-b">
                 <div className="flex items-center gap-2">
                   <FaStar className="text-yellow-400" />
@@ -204,7 +232,7 @@ const EventDetailPage = () => {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 

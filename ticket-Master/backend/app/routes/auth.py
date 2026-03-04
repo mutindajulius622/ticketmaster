@@ -1,3 +1,6 @@
+import os
+import secrets
+import requests as http_requests
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from app.models import db, User
@@ -7,6 +10,94 @@ from datetime import datetime
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 user_schema = UserSchema()
+
+GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '')
+
+
+# ─── Google OAuth ──────────────────────────────────────────────────────────────
+
+@auth_bp.route('/google', methods=['POST'])
+def google_login():
+    """Sign in / sign up with a Google ID token."""
+    try:
+        data = request.get_json()
+        credential = data.get('credential')  # JWT id_token from Google
+        if not credential:
+            return jsonify({'error': 'Missing Google credential'}), 400
+
+        # Verify with Google's tokeninfo endpoint
+        resp = http_requests.get(
+            'https://www.googleapis.com/oauth2/v3/tokeninfo',
+            params={'id_token': credential},
+            timeout=10
+        )
+        if resp.status_code != 200:
+            return jsonify({'error': 'Invalid Google token'}), 401
+
+        google_data = resp.json()
+
+        # Validate audience (skip if GOOGLE_CLIENT_ID not set yet)
+        if GOOGLE_CLIENT_ID and google_data.get('aud') != GOOGLE_CLIENT_ID:
+            return jsonify({'error': 'Token audience mismatch'}), 401
+
+        email = google_data.get('email')
+        if not email:
+            return jsonify({'error': 'No email in Google token'}), 400
+
+        first_name = google_data.get('given_name', email.split('@')[0])
+        last_name  = google_data.get('family_name', '')
+        picture    = google_data.get('picture', '')
+
+        # Find or create user
+        user = User.query.filter_by(email=email).first()
+        is_new = False
+        if not user:
+            is_new = True
+            user = User(
+                email=email,
+                # Random password — Google users log in via OAuth only
+                password_hash=PasswordHandler.hash_password(secrets.token_urlsafe(32)),
+                first_name=first_name,
+                last_name=last_name or 'User',
+                profile_picture=picture,
+                role=User.Role.ATTENDEE,
+                status=User.Status.ACTIVE,
+                email_verified=True,  # Google has already verified the email
+            )
+            db.session.add(user)
+
+        user.last_login = datetime.utcnow()
+        if picture and not user.profile_picture:
+            user.profile_picture = picture
+        db.session.commit()
+
+        # Send welcome email for new users (non-blocking)
+        if is_new:
+            try:
+                from app.utils.email import send_welcome_email
+                send_welcome_email(email, first_name)
+            except Exception:
+                pass
+
+        access_token = create_access_token(
+            identity=user.id,
+            additional_claims={
+                'email': user.email,
+                'role': user.role,
+                'full_name': f"{user.first_name} {user.last_name}"
+            }
+        )
+
+        return jsonify({
+            'message': 'Google login successful',
+            'access_token': access_token,
+            'user': user.to_dict(),
+            'is_new_user': is_new,
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
 
 
 @auth_bp.route('/register', methods=['POST'])
