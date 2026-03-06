@@ -73,34 +73,7 @@ def list_users():
         return jsonify({'error': str(e)}), 500
 
 
-@admin_bp.route('/users/<user_id>/role', methods=['PUT'])
-@jwt_required()
-@admin_required
-def update_user_role(user_id):
-    """Update user role (Admin only)"""
-    try:
-        user = User.query.get(user_id)
-        
-        if not user:
-            return jsonify({'error': 'User not found'}), 404
-        
-        data = request.get_json()
-        new_role = data.get('role')
-        
-        if new_role not in User.Role.VALID_ROLES:
-            return jsonify({'error': 'Invalid role'}), 400
-        
-        user.role = new_role
-        db.session.commit()
-        
-        return jsonify({
-            'message': 'User role updated successfully',
-            'user': user.to_dict()
-        }), 200
-    
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+
 
 
 @admin_bp.route('/users/<user_id>/status', methods=['PUT'])
@@ -160,6 +133,9 @@ def update_user_role(user_id):
             'message': f'User role updated to {role} successfully',
             'user': user.to_dict()
         }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
 
 
 @admin_bp.route('/users/<user_id>', methods=['DELETE'])

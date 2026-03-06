@@ -53,9 +53,8 @@ A full-stack event ticketing and management application built with Flask, React,
 - **Notifications**: React Toastify
 
 ### Deployment
-- **Backend**: Docker + Gunicorn
-- **Frontend**: Docker + Serve
-- **Orchestration**: Docker Compose
+- **Backend & Frontend**: [Vercel Deployment Guide](./DEPLOYMENT.md) (Recommended)
+- **Alternative**: Docker + Gunicorn / Nginx
 
 ## 📋 Prerequisites
 

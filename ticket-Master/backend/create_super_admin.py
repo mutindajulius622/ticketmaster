@@ -1,7 +1,7 @@
 import os
 from app import create_app, db
 from app.models import User
-from werkzeug.security import generate_password_hash
+from app.utils.security import PasswordHandler
 import sys
 
 def create_super_admin(email, password, first_name, last_name):
@@ -12,11 +12,11 @@ def create_super_admin(email, password, first_name, last_name):
         if user:
             print(f"User with email {email} already exists. Updating to Super Admin.")
             user.role = User.Role.SUPER_ADMIN
-            user.password_hash = generate_password_hash(password)
+            user.password_hash = PasswordHandler.hash_password(password)
         else:
             user = User(
                 email=email,
-                password_hash=generate_password_hash(password),
+                password_hash=PasswordHandler.hash_password(password),
                 first_name=first_name,
                 last_name=last_name,
                 role=User.Role.SUPER_ADMIN,

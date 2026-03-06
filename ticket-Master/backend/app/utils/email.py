@@ -166,7 +166,7 @@ def send_welcome_email(recipient_email: str, first_name: str) -> bool:
         <li>📲 Download ticket QR codes</li>
         <li>🔄 Transfer tickets to friends</li>
       </ul>
-      <a href="http://localhost:3000/dashboard" class="cta">Go to My Dashboard →</a>
+      <a href="{os.environ.get('FRONTEND_URL', 'http://localhost:3000')}/dashboard" class="cta">Go to My Dashboard →</a>
     </div>
     <div class="footer">Ticket Master &copy; 2026 &nbsp;|&nbsp; Powered by Google OAuth</div>
   </div>
