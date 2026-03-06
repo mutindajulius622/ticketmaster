@@ -19,32 +19,17 @@ export const fetchUsers = createAsyncThunk(
     }
 );
 
-export const promoteUser = createAsyncThunk(
-    'users/promoteUser',
-    async (userId, { getState, rejectWithValue }) => {
+export const updateUserRole = createAsyncThunk(
+    'users/updateUserRole',
+    async ({ userId, role }, { getState, rejectWithValue }) => {
         try {
             const { auth: { token } } = getState();
-            const response = await axios.post(`${API_URL}/admin/users/${userId}/promote`, {}, {
+            const response = await axios.put(`${API_URL}/admin/users/${userId}/role`, { role }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data?.error || 'Failed to promote user');
-        }
-    }
-);
-
-export const demoteUser = createAsyncThunk(
-    'users/demoteUser',
-    async (userId, { getState, rejectWithValue }) => {
-        try {
-            const { auth: { token } } = getState();
-            const response = await axios.post(`${API_URL}/admin/users/${userId}/demote`, {}, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            return response.data;
-        } catch (error) {
-            return rejectWithValue(error.response?.data?.error || 'Failed to demote user');
+            return rejectWithValue(error.response?.data?.error || 'Failed to update user role');
         }
     }
 );
@@ -91,13 +76,7 @@ const usersSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload;
             })
-            .addCase(promoteUser.fulfilled, (state, action) => {
-                const index = state.users.findIndex(u => u.id === action.payload.user.id);
-                if (index !== -1) {
-                    state.users[index] = action.payload.user;
-                }
-            })
-            .addCase(demoteUser.fulfilled, (state, action) => {
+            .addCase(updateUserRole.fulfilled, (state, action) => {
                 const index = state.users.findIndex(u => u.id === action.payload.user.id);
                 if (index !== -1) {
                     state.users[index] = action.payload.user;

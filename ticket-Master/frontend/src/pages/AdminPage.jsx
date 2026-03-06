@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchUsers, promoteUser, demoteUser, deleteUser } from '../redux/slices/usersSlice';
+import { fetchUsers, updateUserRole, deleteUser } from '../redux/slices/usersSlice';
 import { fetchEvents } from '../redux/slices/eventsSlice';
 import { Link } from 'react-router-dom';
 import {
   FaUserShield, FaUsers, FaCalendarAlt, FaPlus,
   FaTrash, FaArrowDown, FaArrowUp, FaSpinner,
-  FaSearch, FaCheckCircle, FaTimesCircle
+  FaSearch, FaCheckCircle, FaTimesCircle, FaUserTie
 } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 
@@ -27,20 +27,17 @@ const AdminPage = () => {
     }
   }, [dispatch, activeTab, currentUser?.role, searchTerm]);
 
-  const handlePromote = (userId) => {
-    if (window.confirm('Are you sure you want to promote this user to Admin?')) {
-      dispatch(promoteUser(userId))
-        .unwrap()
-        .then(() => toast.success('User promoted to Admin'))
-        .catch((err) => toast.error(err));
-    }
-  };
+  const handleRoleChange = (userId, newRole) => {
+    const roleNames = {
+      'admin': 'Admin',
+      'organizer': 'Event Organizer',
+      'attendee': 'Attendee'
+    };
 
-  const handleDemote = (userId) => {
-    if (window.confirm('Are you sure you want to demote this Admin?')) {
-      dispatch(demoteUser(userId))
+    if (window.confirm(`Are you sure you want to change this user's role to ${roleNames[newRole]}?`)) {
+      dispatch(updateUserRole({ userId, role: newRole }))
         .unwrap()
-        .then(() => toast.success('Admin demoted to Attendee'))
+        .then(() => toast.success(`User role updated to ${roleNames[newRole]}`))
         .catch((err) => toast.error(err));
     }
   };
@@ -76,8 +73,8 @@ const AdminPage = () => {
             <button
               onClick={() => setActiveTab('users')}
               className={`px-8 py-4 font-bold flex items-center gap-2 transition-all ${activeTab === 'users'
-                  ? 'border-b-4 border-blue-600 text-blue-600 bg-white rounded-t-lg'
-                  : 'text-gray-500 hover:text-blue-500'
+                ? 'border-b-4 border-blue-600 text-blue-600 bg-white rounded-t-lg'
+                : 'text-gray-500 hover:text-blue-500'
                 }`}
             >
               <FaUsers /> User Management
@@ -86,8 +83,8 @@ const AdminPage = () => {
           <button
             onClick={() => setActiveTab('events')}
             className={`px-8 py-4 font-bold flex items-center gap-2 transition-all ${activeTab === 'events'
-                ? 'border-b-4 border-blue-600 text-blue-600 bg-white rounded-t-lg'
-                : 'text-gray-500 hover:text-blue-500'
+              ? 'border-b-4 border-blue-600 text-blue-600 bg-white rounded-t-lg'
+              : 'text-gray-500 hover:text-blue-500'
               }`}
           >
             <FaCalendarAlt /> Event Management
@@ -140,7 +137,7 @@ const AdminPage = () => {
                           </td>
                           <td className="px-6 py-4">
                             <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${u.role === 'super_admin' ? 'bg-purple-100 text-purple-800' :
-                                u.role === 'admin' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                              u.role === 'admin' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
                               }`}>
                               {u.role}
                             </span>
@@ -157,25 +154,38 @@ const AdminPage = () => {
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex gap-2">
-                              {u.role === 'attendee' && (
-                                <button
-                                  onClick={() => handlePromote(u.id)}
-                                  className="p-2 text-blue-600 hover:bg-blue-50 rounded"
-                                  title="Promote to Admin"
-                                >
-                                  <FaArrowUp />
-                                </button>
+                              {u.role !== 'super_admin' && (
+                                <>
+                                  {u.role !== 'attendee' && (
+                                    <button
+                                      onClick={() => handleRoleChange(u.id, 'attendee')}
+                                      className="p-2 text-gray-600 hover:bg-gray-100 rounded"
+                                      title="Set as Attendee"
+                                    >
+                                      <FaArrowDown />
+                                    </button>
+                                  )}
+                                  {u.role !== 'organizer' && (
+                                    <button
+                                      onClick={() => handleRoleChange(u.id, 'organizer')}
+                                      className="p-2 text-green-600 hover:bg-green-50 rounded"
+                                      title="Promote to Organizer"
+                                    >
+                                      <FaUserTie />
+                                    </button>
+                                  )}
+                                  {u.role !== 'admin' && (
+                                    <button
+                                      onClick={() => handleRoleChange(u.id, 'admin')}
+                                      className="p-2 text-blue-600 hover:bg-blue-50 rounded"
+                                      title="Promote to Admin"
+                                    >
+                                      <FaArrowUp />
+                                    </button>
+                                  )}
+                                </>
                               )}
-                              {u.role === 'admin' && (
-                                <button
-                                  onClick={() => handleDemote(u.id)}
-                                  className="p-2 text-orange-600 hover:bg-orange-50 rounded"
-                                  title="Demote to Attendee"
-                                >
-                                  <FaArrowDown />
-                                </button>
-                              )}
-                              {u.id !== currentUser.id && (
+                              {u.id !== currentUser.id && u.role !== 'super_admin' && (
                                 <button
                                   onClick={() => handleDeleteUser(u.id)}
                                   className="p-2 text-red-600 hover:bg-red-50 rounded"

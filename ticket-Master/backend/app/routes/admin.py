@@ -133,48 +133,33 @@ def update_user_status(user_id):
         return jsonify({'error': str(e)}), 500
 
 
-@admin_bp.route('/users/<user_id>/promote', methods=['POST'])
+
+
+
+@admin_bp.route('/users/<user_id>/role', methods=['PUT'])
 @jwt_required()
 @super_admin_required
-def promote_user_to_admin(user_id):
-    """Promote a user to Admin (Super Admin only)"""
+def update_user_role(user_id):
+    """Update user role (Super Admin only)"""
     try:
         user = User.query.get(user_id)
         if not user:
             return jsonify({'error': 'User not found'}), 404
         
-        user.role = User.Role.ADMIN
+        data = request.get_json()
+        role = data.get('role')
+        
+        if role not in User.Role.VALID_ROLES:
+            return jsonify({'error': 'Invalid role'}), 400
+            
+        # Prevent self-demotion from super_admin if needed, but for now just update
+        user.role = role
         db.session.commit()
         
         return jsonify({
-            'message': 'User promoted to Admin successfully',
+            'message': f'User role updated to {role} successfully',
             'user': user.to_dict()
         }), 200
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)}), 500
-
-
-@admin_bp.route('/users/<user_id>/demote', methods=['POST'])
-@jwt_required()
-@super_admin_required
-def demote_admin(user_id):
-    """Demote an Admin to Attendee (Super Admin only)"""
-    try:
-        user = User.query.get(user_id)
-        if not user:
-            return jsonify({'error': 'User not found'}), 404
-        
-        user.role = User.Role.ATTENDEE
-        db.session.commit()
-        
-        return jsonify({
-            'message': 'Admin demoted to Attendee successfully',
-            'user': user.to_dict()
-        }), 200
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)}), 500
 
 
 @admin_bp.route('/users/<user_id>', methods=['DELETE'])
