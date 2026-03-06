@@ -36,18 +36,22 @@ const Navigation = () => {
             >
               Home
             </Link>
-            <Link
-              to="/dashboard"
-              className={`hover:text-blue-200 transition ${isActive('/dashboard') ? 'text-blue-200 border-b-2' : ''}`}
-            >
-              Dashboard
-            </Link>
-            <Link
-              to="/saved-events"
-              className={`hover:text-blue-200 transition ${isActive('/saved-events') ? 'text-blue-200 border-b-2' : ''}`}
-            >
-              Saved Events
-            </Link>
+            {user && (
+              <>
+                <Link
+                  to="/dashboard"
+                  className={`hover:text-blue-200 transition ${isActive('/dashboard') ? 'text-blue-200 border-b-2' : ''}`}
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  to="/saved-events"
+                  className={`hover:text-blue-200 transition ${isActive('/saved-events') ? 'text-blue-200 border-b-2' : ''}`}
+                >
+                  Saved Events
+                </Link>
+              </>
+            )}
             {user && (user.role === 'admin' || user.role === 'super_admin') && (
               <Link
                 to="/admin"
@@ -66,24 +70,40 @@ const Navigation = () => {
 
           {/* User Menu */}
           <div className="hidden md:flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <img
-                src={user?.profile_picture || `https://i.pravatar.cc/40?u=${user?.email}`}
-                alt="Profile"
-                className="w-8 h-8 rounded-full"
-              />
-              <span className="text-sm">{user?.first_name}</span>
-            </div>
-            <Link to="/profile" className="hover:text-blue-200 transition">
-              <FaUser size={18} />
-            </Link>
-            <button
-              onClick={handleLogout}
-              className="hover:text-blue-200 transition flex items-center space-x-1"
-            >
-              <FaSignOutAlt size={18} />
-              <span>Logout</span>
-            </button>
+            {user ? (
+              <>
+                <div className="flex items-center space-x-2">
+                  <img
+                    src={user?.profile_picture || `https://i.pravatar.cc/40?u=${user?.email}`}
+                    alt="Profile"
+                    className="w-8 h-8 rounded-full"
+                  />
+                  <span className="text-sm">{user?.first_name}</span>
+                </div>
+                <Link to="/profile" className="hover:text-blue-200 transition">
+                  <FaUser size={18} />
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="hover:text-blue-200 transition flex items-center space-x-1"
+                >
+                  <FaSignOutAlt size={18} />
+                  <span>Logout</span>
+                </button>
+              </>
+            ) : (
+              <div className="flex items-center space-x-4">
+                <Link to="/login" className="hover:text-blue-200 font-semibold transition">
+                  Login
+                </Link>
+                <Link
+                  to="/register"
+                  className="bg-white text-blue-600 px-4 py-2 rounded-lg font-bold hover:bg-blue-50 transition"
+                >
+                  Register
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -105,28 +125,63 @@ const Navigation = () => {
             >
               Home
             </Link>
-            <Link
-              to="/dashboard"
-              className="block px-4 py-2 hover:bg-blue-700 rounded"
-              onClick={() => setIsOpen(false)}
-            >
-              Dashboard
-            </Link>
-            <Link
-              to="/saved-events"
-              className="block px-4 py-2 hover:bg-blue-700 rounded"
-              onClick={() => setIsOpen(false)}
-            >
-              Saved Events
-            </Link>
-            {(user?.role === 'admin' || user?.role === 'super_admin') && (
-              <Link
-                to="/admin"
-                className="block px-4 py-2 hover:bg-blue-700 rounded"
-                onClick={() => setIsOpen(false)}
-              >
-                Admin
-              </Link>
+            {user ? (
+              <>
+                <Link
+                  to="/dashboard"
+                  className="block px-4 py-2 hover:bg-blue-700 rounded"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  to="/saved-events"
+                  className="block px-4 py-2 hover:bg-blue-700 rounded"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Saved Events
+                </Link>
+                {(user?.role === 'admin' || user?.role === 'super_admin') && (
+                  <Link
+                    to="/admin"
+                    className="block px-4 py-2 hover:bg-blue-700 rounded"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Admin
+                  </Link>
+                )}
+                <Link
+                  to="/profile"
+                  className="block px-4 py-2 hover:bg-blue-700 rounded"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Profile
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left px-4 py-2 hover:bg-blue-700 rounded flex items-center space-x-2"
+                >
+                  <FaSignOutAlt />
+                  <span>Logout</span>
+                </button>
+              </>
+            ) : (
+              <div className="space-y-1">
+                <Link
+                  to="/login"
+                  className="block px-4 py-2 hover:bg-blue-700 rounded"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/register"
+                  className="block px-4 py-2 hover:bg-blue-700 rounded bg-white text-blue-600 font-bold mx-4 mt-2"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Register
+                </Link>
+              </div>
             )}
             <Link
               to="/quick-ticket"
@@ -135,20 +190,6 @@ const Navigation = () => {
             >
               Quick Ticket
             </Link>
-            <Link
-              to="/profile"
-              className="block px-4 py-2 hover:bg-blue-700 rounded"
-              onClick={() => setIsOpen(false)}
-            >
-              Profile
-            </Link>
-            <button
-              onClick={handleLogout}
-              className="w-full text-left px-4 py-2 hover:bg-blue-700 rounded flex items-center space-x-2"
-            >
-              <FaSignOutAlt />
-              <span>Logout</span>
-            </button>
           </div>
         )}
       </div>

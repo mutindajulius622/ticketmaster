@@ -186,6 +186,9 @@ def delete_user(user_id):
         user = User.query.get(user_id)
         if not user:
             return jsonify({'error': 'User not found'}), 404
+            
+        if str(user.id) == get_jwt_identity():
+            return jsonify({'error': 'You cannot delete your own account'}), 400
         
         db.session.delete(user)
         db.session.commit()

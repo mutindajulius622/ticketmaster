@@ -20,8 +20,8 @@ def create_event():
         claims = get_jwt()
         
         user = User.query.get(current_user_id)
-        if not user or user.role not in [User.Role.ORGANIZER, User.Role.ADMIN]:
-            return jsonify({'error': 'Only organizers can create events'}), 403
+        if not user or user.role not in [User.Role.ORGANIZER, User.Role.ADMIN, User.Role.SUPER_ADMIN]:
+            return jsonify({'error': 'Unauthorized to create events'}), 403
         
         data = request.get_json()
         

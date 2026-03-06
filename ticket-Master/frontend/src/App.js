@@ -37,7 +37,7 @@ function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      {isAuthenticated && <Navigation />}
+      <Navigation />
 
       <main className="flex-1">
         <Routes>
