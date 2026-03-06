@@ -7,6 +7,8 @@ import store from './redux/store';
 import './styles/index.css';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
+import { SpeedInsights } from "@vercel/speed-insights/react"
+
 const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID || "PASTE_YOUR_GOOGLE_CLIENT_ID_HERE";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -16,6 +18,7 @@ root.render(
       <Provider store={store}>
         <BrowserRouter>
           <App />
+          <SpeedInsights />
         </BrowserRouter>
       </Provider>
     </GoogleOAuthProvider>

@@ -65,7 +65,10 @@ class ProductionConfig(Config):
     """Production configuration"""
     DEBUG = False
     TESTING = False
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
+    _db_url = os.getenv('DATABASE_URL')
+    if _db_url and _db_url.startswith("postgres://"):
+        _db_url = _db_url.replace("postgres://", "postgresql://", 1)
+    SQLALCHEMY_DATABASE_URI = _db_url
     SESSION_COOKIE_SECURE = True
     PREFERRED_URL_SCHEME = 'https'
 
