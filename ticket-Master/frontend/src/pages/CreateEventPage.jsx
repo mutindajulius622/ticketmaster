@@ -7,8 +7,7 @@ import {
     FaTrash, FaChevronRight, FaChevronLeft, FaStar, FaGlobeAmericas
 } from 'react-icons/fa';
 import { toast } from 'react-toastify';
-
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+import api from '../services/api';
 
 // ─── Step Indicator ───────────────────────────────────────────────────────────
 const steps = ['Event Info', 'Venue', 'Seats & Sections', 'Pricing', 'Review'];
@@ -19,8 +18,8 @@ const StepBar = ({ current }) => (
             <React.Fragment key={i}>
                 <div className="flex flex-col items-center">
                     <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all ${current > i ? 'bg-blue-600 border-blue-600 text-white'
-                            : current === i ? 'border-blue-600 text-blue-600 bg-white'
-                                : 'border-gray-300 text-gray-400 bg-white'
+                        : current === i ? 'border-blue-600 text-blue-600 bg-white'
+                            : 'border-gray-300 text-gray-400 bg-white'
                         }`}>
                         {current > i ? <FaCheckCircle /> : i + 1}
                     </div>
@@ -118,13 +117,12 @@ const CreateEventPage = () => {
             const reader = new FileReader();
             return await new Promise((resolve) => {
                 reader.onloadend = async () => {
-                    const res = await fetch(`${API_URL}/admin/upload-image`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                        body: JSON.stringify({ image: reader.result }),
-                    });
-                    const data = await res.json();
-                    resolve(data.image_url || event.image_url);
+                    try {
+                        const data = await api.post('/admin/upload-image', { image: reader.result });
+                        resolve(data.image_url || event.image_url);
+                    } catch (err) {
+                        resolve(event.image_url);
+                    }
                 };
                 reader.readAsDataURL(imageFile);
             });
@@ -167,18 +165,12 @@ const CreateEventPage = () => {
                 ticket_types,
             };
 
-            const res = await fetch(`${API_URL}/admin/events/create-full`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                body: JSON.stringify(payload),
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || 'Failed to create event');
+            const data = await api.post('/admin/events/create-full', payload);
 
             toast.success('🎉 Event created successfully!');
             navigate(`/events/${data.event.id}`);
         } catch (err) {
-            toast.error(err.message);
+            toast.error(err.response?.data?.error || err.message);
         } finally {
             setLoading(false);
         }

@@ -3,10 +3,7 @@
     "builds": [
         {
             "src": "backend/api/index.py",
-            "use": "@vercel/python",
-            "config": {
-                "maxDuration": 60
-            }
+            "use": "@vercel/python"
         },
         {
             "src": "frontend/package.json",
@@ -22,11 +19,16 @@
             "dest": "backend/api/index.py"
         },
         {
+            "src": "/uploads/(.*)",
+            "dest": "backend/api/index.py"
+        },
+        {
             "src": "/(.*)",
             "dest": "frontend/$1"
         }
     ],
     "env": {
-        "FLASK_ENV": "production"
+        "FLASK_ENV": "production",
+        "PYTHON_VERSION": "3.9"
     }
 }

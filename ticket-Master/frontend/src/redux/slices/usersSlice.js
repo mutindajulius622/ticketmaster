@@ -1,18 +1,14 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+import api from '../../services/api';
 
 export const fetchUsers = createAsyncThunk(
     'users/fetchUsers',
-    async ({ page = 1, limit = 10, search = '' }, { getState, rejectWithValue }) => {
+    async ({ page = 1, limit = 10, search = '' }, { rejectWithValue }) => {
         try {
-            const { auth: { token } } = getState();
-            const response = await axios.get(`${API_URL}/admin/users`, {
-                params: { page, limit, search },
-                headers: { Authorization: `Bearer ${token}` }
+            const response = await api.get('/admin/users', {
+                params: { page, limit, search }
             });
-            return response.data;
+            return response;
         } catch (error) {
             return rejectWithValue(error.response?.data?.error || 'Failed to fetch users');
         }
@@ -21,13 +17,10 @@ export const fetchUsers = createAsyncThunk(
 
 export const updateUserRole = createAsyncThunk(
     'users/updateUserRole',
-    async ({ userId, role }, { getState, rejectWithValue }) => {
+    async ({ userId, role }, { rejectWithValue }) => {
         try {
-            const { auth: { token } } = getState();
-            const response = await axios.put(`${API_URL}/admin/users/${userId}/role`, { role }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            return response.data;
+            const response = await api.put(`/admin/users/${userId}/role`, { role });
+            return response;
         } catch (error) {
             return rejectWithValue(error.response?.data?.error || 'Failed to update user role');
         }
@@ -36,12 +29,9 @@ export const updateUserRole = createAsyncThunk(
 
 export const deleteUser = createAsyncThunk(
     'users/deleteUser',
-    async (userId, { getState, rejectWithValue }) => {
+    async (userId, { rejectWithValue }) => {
         try {
-            const { auth: { token } } = getState();
-            const response = await axios.delete(`${API_URL}/admin/users/${userId}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await api.delete(`/admin/users/${userId}`);
             return userId;
         } catch (error) {
             return rejectWithValue(error.response?.data?.error || 'Failed to delete user');
