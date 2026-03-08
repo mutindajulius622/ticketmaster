@@ -49,7 +49,7 @@ def test_reserve_and_expire_release(client, app):
         assert 'reserved' in data and seat.id in data['reserved']
 
         # Ensure seat status is RESERVED
-        s = Seat.query.get(seat.id)
+        s = db.session.get(Seat, seat.id)
         assert s.status == Seat.Status.RESERVED
 
         # Wait for expiration
@@ -65,5 +65,5 @@ def test_reserve_and_expire_release(client, app):
         db.session.commit()
 
         # Verify seat released
-        s2 = Seat.query.get(seat.id)
+        s2 = db.session.get(Seat, seat.id)
         assert s2.status == Seat.Status.AVAILABLE

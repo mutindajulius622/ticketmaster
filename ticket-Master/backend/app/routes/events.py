@@ -15,7 +15,7 @@ def create_event():
         current_user_id = get_jwt_identity()
         claims = get_jwt()
         
-        user = User.query.get(current_user_id)
+        user = db.session.get(User, current_user_id)
         if not user or user.role not in [User.Role.ORGANIZER, User.Role.ADMIN, User.Role.SUPER_ADMIN]:
             return jsonify({'error': 'Unauthorized to create events'}), 403
         
@@ -61,7 +61,7 @@ def update_event(event_id):
     """Update an event (Organizer only)"""
     try:
         current_user_id = get_jwt_identity()
-        event = Event.query.get(event_id)
+        event = db.session.get(Event, event_id)
         
         if not event:
             return jsonify({'error': 'Event not found'}), 404
@@ -106,7 +106,7 @@ def delete_event(event_id):
     """Delete an event (Organizer only)"""
     try:
         current_user_id = get_jwt_identity()
-        event = Event.query.get(event_id)
+        event = db.session.get(Event, event_id)
         
         if not event:
             return jsonify({'error': 'Event not found'}), 404
@@ -128,7 +128,7 @@ def delete_event(event_id):
 def get_event(event_id):
     """Get event details"""
     try:
-        event = Event.query.get(event_id)
+        event = db.session.get(Event, event_id)
         
         if not event:
             return jsonify({'error': 'Event not found'}), 404
@@ -244,7 +244,7 @@ def create_ticket_type(event_id):
     """Create ticket type for event"""
     try:
         current_user_id = get_jwt_identity()
-        event = Event.query.get(event_id)
+        event = db.session.get(Event, event_id)
         
         if not event:
             return jsonify({'error': 'Event not found'}), 404
@@ -282,7 +282,7 @@ def create_ticket_type(event_id):
 def get_event_reviews(event_id):
     """Get reviews for an event"""
     try:
-        event = Event.query.get(event_id)
+        event = db.session.get(Event, event_id)
         
         if not event:
             return jsonify({'error': 'Event not found'}), 404
@@ -305,7 +305,7 @@ def create_review(event_id):
     """Create a review for an event"""
     try:
         current_user_id = get_jwt_identity()
-        event = Event.query.get(event_id)
+        event = db.session.get(Event, event_id)
         
         if not event:
             return jsonify({'error': 'Event not found'}), 404
@@ -355,8 +355,8 @@ def save_event(event_id):
     """Save/Favorite an event"""
     try:
         current_user_id = get_jwt_identity()
-        user = User.query.get(current_user_id)
-        event = Event.query.get(event_id)
+        user = db.session.get(User, current_user_id)
+        event = db.session.get(Event, event_id)
         
         if not event:
             return jsonify({'error': 'Event not found'}), 404
@@ -379,8 +379,8 @@ def unsave_event(event_id):
     """Remove an event from favorites"""
     try:
         current_user_id = get_jwt_identity()
-        user = User.query.get(current_user_id)
-        event = Event.query.get(event_id)
+        user = db.session.get(User, current_user_id)
+        event = db.session.get(Event, event_id)
         
         if not event:
             return jsonify({'error': 'Event not found'}), 404
@@ -401,7 +401,7 @@ def list_saved_events():
     """List current user's saved events"""
     try:
         current_user_id = get_jwt_identity()
-        user = User.query.get(current_user_id)
+        user = db.session.get(User, current_user_id)
         
         return jsonify({
             'events': [e.to_dict() for e in user.saved_events]

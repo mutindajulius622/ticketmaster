@@ -9,7 +9,7 @@ seats_bp = Blueprint('seats', __name__, url_prefix='/api/seats')
 @seats_bp.route('/venue/<int:venue_id>/seatmap', methods=['GET'])
 def get_venue_seatmap(venue_id):
     try:
-        venue = Venue.query.get(venue_id)
+        venue = db.session.get(Venue, venue_id)
         if not venue:
             return jsonify({'error': 'Venue not found'}), 404
 
@@ -52,7 +52,7 @@ def reserve_seats():
         conflicts = []
 
         for sid in seat_ids:
-            seat = Seat.query.get(sid)
+            seat = db.session.get(Seat, sid)
             if not seat:
                 conflicts.append({'seat_id': sid, 'reason': 'not_found'})
                 continue
@@ -103,7 +103,7 @@ def release_seats():
             return jsonify({'error': 'No seats specified'}), 400
 
         for sid in seat_ids:
-            seat = Seat.query.get(sid)
+            seat = db.session.get(Seat, sid)
             if not seat:
                 continue
             seat.status = Seat.Status.AVAILABLE

@@ -20,7 +20,7 @@ def create_paypal_order():
         if not data.get('payment_id'):
             return jsonify({'error': 'Missing payment_id'}), 400
         
-        payment = Payment.query.get(data['payment_id'])
+        payment = db.session.get(Payment, data['payment_id'])
         if not payment:
             return jsonify({'error': 'Payment not found'}), 404
         
@@ -85,13 +85,13 @@ def create_payment():
 
         if seat_ids:
             for sid in seat_ids:
-                seat = Seat.query.get(sid)
+                seat = db.session.get(Seat, sid)
                 if not seat:
                     return jsonify({'error': f'Seat not found: {sid}'}), 404
                 amount += float(seat.price or 0)
                 tickets_to_create.append({'seat_id': seat.id, 'price': seat.price or 0, 'ticket_type_id': ticket_type_id})
         elif ticket_type_id and quantity > 0:
-            tt = TicketType.query.get(ticket_type_id)
+            tt = db.session.get(TicketType, ticket_type_id)
             if not tt:
                 return jsonify({'error': 'Ticket type not found'}), 404
             amount = float(tt.price) * quantity
@@ -132,7 +132,7 @@ def create_payment():
 
             # Mark seat as RESERVED if provided
             if t.get('seat_id'):
-                s = Seat.query.get(t.get('seat_id'))
+                s = db.session.get(Seat, t.get('seat_id'))
                 if s and s.status == Seat.Status.AVAILABLE:
                     s.status = Seat.Status.RESERVED
                     s.reserved_by = current_user_id
@@ -199,7 +199,7 @@ def capture_paypal_order():
             # Send emails to the user for each ticket
             try:
                 from app.utils.email import send_ticket_email
-                user = User.query.get(current_user_id)
+                user = db.session.get(User, current_user_id)
                 for ticket in tickets:
                     ticket_dict = ticket.to_dict()
                     event_dict = ticket.event.to_dict() if ticket.event else {}
@@ -286,7 +286,7 @@ def get_payment_status(payment_id):
     """Get payment status"""
     try:
         current_user_id = get_jwt_identity()
-        payment = Payment.query.get(payment_id)
+        payment = db.session.get(Payment, payment_id)
         
         if not payment:
             return jsonify({'error': 'Payment not found'}), 404
@@ -336,7 +336,7 @@ def refund_payment(payment_id):
     """Refund a payment"""
     try:
         current_user_id = get_jwt_identity()
-        payment = Payment.query.get(payment_id)
+        payment = db.session.get(Payment, payment_id)
         
         if not payment:
             return jsonify({'error': 'Payment not found'}), 404

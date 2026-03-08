@@ -78,7 +78,7 @@ def list_users():
 def update_user_status(user_id):
     """Update user status (Admin only)"""
     try:
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
         
         if not user:
             return jsonify({'error': 'User not found'}), 404
@@ -108,7 +108,7 @@ def update_user_status(user_id):
 def update_user_role(user_id):
     """Update user role (Super Admin only)"""
     try:
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
         if not user:
             return jsonify({'error': 'User not found'}), 404
         
@@ -137,7 +137,7 @@ def update_user_role(user_id):
 def delete_user(user_id):
     """Delete a user (Super Admin only)"""
     try:
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
         if not user:
             return jsonify({'error': 'User not found'}), 404
             
@@ -191,7 +191,7 @@ def list_all_events():
 def approve_event(event_id):
     """Approve an event (Admin only)"""
     try:
-        event = Event.query.get(event_id)
+        event = db.session.get(Event, event_id)
         
         if not event:
             return jsonify({'error': 'Event not found'}), 404
@@ -215,7 +215,7 @@ def approve_event(event_id):
 def reject_event(event_id):
     """Reject an event (Admin only)"""
     try:
-        event = Event.query.get(event_id)
+        event = db.session.get(Event, event_id)
         
         if not event:
             return jsonify({'error': 'Event not found'}), 404
@@ -418,7 +418,7 @@ def create_full_event():
         # ── Venue ──
         venue = None
         if vn.get('reuse_id'):
-            venue = Venue.query.get(vn['reuse_id'])
+            venue = db.session.get(Venue, vn['reuse_id'])
         if not venue:
             total_capacity = sum(
                 int(s.get('rows', 0)) * int(s.get('seats_per_row', 0))

@@ -49,7 +49,7 @@ def get_ticket(ticket_id):
     """Get ticket details"""
     try:
         current_user_id = get_jwt_identity()
-        ticket = Ticket.query.get(ticket_id)
+        ticket = db.session.get(Ticket, ticket_id)
         
         if not ticket:
             return jsonify({'error': 'Ticket not found'}), 404
@@ -79,7 +79,7 @@ def purchase_ticket():
         if not data.get('ticket_type_id') or not data.get('quantity'):
             return jsonify({'error': 'Missing required fields'}), 400
         
-        ticket_type = TicketType.query.get(data['ticket_type_id'])
+        ticket_type = db.session.get(TicketType, data['ticket_type_id'])
         if not ticket_type:
             return jsonify({'error': 'Ticket type not found'}), 404
         
@@ -162,7 +162,7 @@ def cancel_ticket(ticket_id):
     """Cancel a ticket"""
     try:
         current_user_id = get_jwt_identity()
-        ticket = Ticket.query.get(ticket_id)
+        ticket = db.session.get(Ticket, ticket_id)
         
         if not ticket:
             return jsonify({'error': 'Ticket not found'}), 404
@@ -196,7 +196,7 @@ def download_ticket(ticket_id):
     """Download ticket data (with QR code, generated on-the-fly if needed)"""
     try:
         current_user_id = get_jwt_identity()
-        ticket = Ticket.query.get(ticket_id)
+        ticket = db.session.get(Ticket, ticket_id)
 
         if not ticket:
             return jsonify({'error': 'Ticket not found'}), 404
@@ -235,8 +235,8 @@ def email_ticket(ticket_id):
     """Send ticket to user's email"""
     try:
         current_user_id = get_jwt_identity()
-        user = User.query.get(current_user_id)
-        ticket = Ticket.query.get(ticket_id)
+        user = db.session.get(User, current_user_id)
+        ticket = db.session.get(Ticket, ticket_id)
 
         if not ticket:
             return jsonify({'error': 'Ticket not found'}), 404
@@ -264,13 +264,13 @@ def validate_ticket(ticket_id):
     """Validate/scan a ticket (for event staff)"""
     try:
         current_user_id = get_jwt_identity()
-        user = User.query.get(current_user_id)
+        user = db.session.get(User, current_user_id)
         
         # Only event organizers and admins can validate tickets
         if not user or user.role not in [User.Role.ORGANIZER, User.Role.ADMIN]:
             return jsonify({'error': 'Only event staff can validate tickets'}), 403
         
-        ticket = Ticket.query.get(ticket_id)
+        ticket = db.session.get(Ticket, ticket_id)
         
         if not ticket:
             return jsonify({'error': 'Ticket not found'}), 404
@@ -313,7 +313,7 @@ def transfer_ticket(ticket_id):
         if not recipient_email:
             return jsonify({'error': 'Recipient email is required'}), 400
             
-        ticket = Ticket.query.get(ticket_id)
+        ticket = db.session.get(Ticket, ticket_id)
         if not ticket:
             return jsonify({'error': 'Ticket not found'}), 404
             
@@ -380,7 +380,7 @@ def quick_purchase():
         if not all([email, first_name, last_name, event_id]):
             return jsonify({'error': 'Missing required fields (email, names, event_id)'}), 400
             
-        event = Event.query.get(event_id)
+        event = db.session.get(Event, event_id)
         if not event:
             return jsonify({'error': 'Event not found'}), 404
             
@@ -404,7 +404,7 @@ def quick_purchase():
         # Handle seat selection if provided
         seat = None
         if seat_id:
-            seat = Seat.query.get(seat_id)
+            seat = db.session.get(Seat, seat_id)
             if not seat:
                 return jsonify({'error': 'Seat not found'}), 404
             if seat.status != Seat.Status.AVAILABLE and seat.status != Seat.Status.RESERVED:
