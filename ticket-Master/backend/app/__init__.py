@@ -22,7 +22,18 @@ def create_app(config_name=None):
     app = Flask(__name__)
     
     # Load configuration
-    app.config.from_object(config[config_name])
+    cfg = config.get(config_name, config['default'])
+    app.config.from_object(cfg)
+    
+    # Ensure SQLALCHEMY_DATABASE_URI is set
+    if not app.config.get('SQLALCHEMY_DATABASE_URI'):
+        db_url = os.getenv('DATABASE_URL')
+        if db_url:
+            if db_url.startswith("postgres://"):
+                db_url = db_url.replace("postgres://", "postgresql://", 1)
+            app.config['SQLALCHEMY_DATABASE_URI'] = db_url
+        else:
+            app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/ticket_master.db'
     
     # Initialize extensions
     db.init_app(app)
