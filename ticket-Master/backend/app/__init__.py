@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
@@ -72,7 +72,6 @@ def create_app(config_name=None):
     
     os.makedirs(upload_dir, exist_ok=True)
 
-    from flask import send_from_directory
     @app.route('/uploads/<path:filename>')
     def serve_upload(filename):
         return send_from_directory(upload_dir, filename)

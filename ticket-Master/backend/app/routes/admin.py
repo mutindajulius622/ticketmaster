@@ -68,12 +68,8 @@ def list_users():
                 'pages': (total + limit - 1) // limit
             }
         }), 200
-    
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
-
-
 
 
 @admin_bp.route('/users/<user_id>/status', methods=['PUT'])
@@ -104,9 +100,6 @@ def update_user_status(user_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
-
-
-
 
 
 @admin_bp.route('/users/<user_id>/role', methods=['PUT'])

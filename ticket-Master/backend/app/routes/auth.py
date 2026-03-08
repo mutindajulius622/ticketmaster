@@ -4,12 +4,10 @@ import requests as http_requests
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from app.models import db, User
-from app.utils.security import PasswordHandler, ValidationHandler, JWTHandler
-from app.schemas.user_schema import UserSchema
+from app.utils.security import PasswordHandler, ValidationHandler
 from datetime import datetime
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
-user_schema = UserSchema()
 
 GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '')
 

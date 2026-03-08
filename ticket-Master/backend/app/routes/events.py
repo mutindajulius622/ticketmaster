@@ -1,14 +1,10 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.models import db, Event, TicketType, Ticket, User, Review
-from app.schemas.user_schema import EventSchema, TicketTypeSchema, ReviewSchema
 from datetime import datetime
-from sqlalchemy import or_, and_
+from sqlalchemy import or_
 
 events_bp = Blueprint('events', __name__, url_prefix='/api/events')
-event_schema = EventSchema()
-ticket_type_schema = TicketTypeSchema()
-review_schema = ReviewSchema()
 
 
 @events_bp.route('', methods=['POST'])

@@ -1,12 +1,11 @@
 from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app.models import db, Payment, Ticket, User
-from app.schemas.user_schema import PaymentSchema
+from app.models import db, Payment, Ticket, User, Seat, TicketType
 from app.utils.integrations import PayPalHandler
-from datetime import datetime
+from datetime import datetime, timedelta
+from app.utils.security import ValidationHandler
 
 payments_bp = Blueprint('payments', __name__, url_prefix='/api/payments')
-payment_schema = PaymentSchema()
 
 
 @payments_bp.route('/paypal/create-order', methods=['POST'])
@@ -40,7 +39,7 @@ def create_paypal_order():
         
         if result['success']:
             order_data = result['data']
-            payment.metadata = {
+            payment.metadata_json = {
                 'paypal_order_id': order_data.get('id'),
                 'status': order_data.get('status')
             }
@@ -86,18 +85,12 @@ def create_payment():
 
         if seat_ids:
             for sid in seat_ids:
-                seat = None
-                try:
-                    from app.models import Seat
-                    seat = Seat.query.get(sid)
-                except Exception:
-                    seat = None
+                seat = Seat.query.get(sid)
                 if not seat:
                     return jsonify({'error': f'Seat not found: {sid}'}), 404
                 amount += float(seat.price or 0)
                 tickets_to_create.append({'seat_id': seat.id, 'price': seat.price or 0, 'ticket_type_id': ticket_type_id})
         elif ticket_type_id and quantity > 0:
-            from app.models import TicketType
             tt = TicketType.query.get(ticket_type_id)
             if not tt:
                 return jsonify({'error': 'Ticket type not found'}), 404
@@ -108,7 +101,6 @@ def create_payment():
             return jsonify({'error': 'No seats or ticket type specified'}), 400
 
         # Create payment
-        from app.utils.security import ValidationHandler
         payment = Payment(
             user_id=current_user_id,
             amount=amount,
@@ -144,7 +136,6 @@ def create_payment():
                 if s and s.status == Seat.Status.AVAILABLE:
                     s.status = Seat.Status.RESERVED
                     s.reserved_by = current_user_id
-                    from datetime import datetime, timedelta
                     s.reserved_until = datetime.utcnow() + timedelta(minutes=10)
 
         db.session.commit()
@@ -169,11 +160,7 @@ def capture_paypal_order():
             return jsonify({'error': 'Missing order_id'}), 400
         
         # Find payment by PayPal order ID
-        payment = Payment.query.all()
-        payment = next(
-            (p for p in payment if p.metadata and p.metadata.get('paypal_order_id') == data['order_id']),
-            None
-        )
+        payment = Payment.query.filter(Payment.metadata_json.contains({'paypal_order_id': data['order_id']})).first()
         
         if not payment:
             return jsonify({'error': 'Payment not found'}), 404
@@ -188,12 +175,12 @@ def capture_paypal_order():
         if result['success']:
             order_data = result['data']
             payment.status = Payment.Status.COMPLETED
-            payment.metadata['paypal_order_data'] = order_data
+            payment.metadata_json['paypal_order_data'] = order_data
             
             # Extract capture ID from purchase units
             try:
                 capture_id = order_data['purchase_units'][0]['payments']['captures'][0]['id']
-                payment.metadata['paypal_capture_id'] = capture_id
+                payment.metadata_json['paypal_capture_id'] = capture_id
             except (KeyError, IndexError):
                 pass
             
@@ -218,7 +205,7 @@ def capture_paypal_order():
                     event_dict = ticket.event.to_dict() if ticket.event else {}
                     send_ticket_email(user.email, ticket_dict, event_dict)
             except Exception as email_err:
-                print(f"[PURCHASE EMAIL ERROR] {email_err}")
+                current_app.logger.error(f"[PURCHASE EMAIL ERROR] {email_err}")
             
             return jsonify({
                 'message': 'Payment captured successfully',
@@ -257,11 +244,7 @@ def paypal_callback():
             # Payment completed via webhook
             order_id = resource.get('supplementary_data', {}).get('related_ids', {}).get('order_id')
             
-            payment = Payment.query.all()
-            payment = next(
-                (p for p in payment if p.metadata and p.metadata.get('paypal_order_id') == order_id),
-                None
-            )
+            payment = Payment.query.filter(Payment.metadata_json.contains({'paypal_order_id': order_id})).first()
             
             if payment:
                 payment.status = Payment.Status.COMPLETED
@@ -277,11 +260,7 @@ def paypal_callback():
             # Refund processed
             capture_id = resource.get('id')
             
-            payment = Payment.query.all()
-            payment = next(
-                (p for p in payment if p.metadata and p.metadata.get('paypal_capture_id') == capture_id),
-                None
-            )
+            payment = Payment.query.filter(Payment.metadata_json.contains({'paypal_capture_id': capture_id})).first()
             
             if payment:
                 payment.status = Payment.Status.REFUNDED
@@ -370,7 +349,7 @@ def refund_payment(payment_id):
         
         # Perform PayPal refund
         paypal = PayPalHandler()
-        capture_id = payment.metadata.get('paypal_capture_id') if payment.metadata else None
+        capture_id = payment.metadata_json.get('paypal_capture_id') if payment.metadata_json else None
         
         if not capture_id:
             return jsonify({'error': 'No capture ID found for refund'}), 400

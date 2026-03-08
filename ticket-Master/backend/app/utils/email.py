@@ -9,6 +9,9 @@ import base64
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 SMTP_HOST = os.environ.get('SMTP_HOST', '')
@@ -96,12 +99,12 @@ def send_ticket_email(recipient_email: str, ticket: dict, event: dict) -> bool:
         """
 
         # Log to console regardless (useful for debugging)
-        print(f"[EMAIL] Sending ticket {ticket_number} to {recipient_email}")
+        logger.info(f"[EMAIL] Sending ticket {ticket_number} to {recipient_email}")
 
         # If SMTP is not configured, just simulate
         if not SMTP_HOST or not SMTP_USER:
-            print(f"[EMAIL SIMULATED] No SMTP configured. Would send to: {recipient_email}")
-            print(f"[EMAIL SIMULATED] Subject: Your Ticket - {event_title}")
+            logger.info(f"[EMAIL SIMULATED] No SMTP configured. Would send to: {recipient_email}")
+            logger.info(f"[EMAIL SIMULATED] Subject: Your Ticket - {event_title}")
             return True
 
         msg = MIMEMultipart('related')
@@ -125,11 +128,11 @@ def send_ticket_email(recipient_email: str, ticket: dict, event: dict) -> bool:
             server.login(SMTP_USER, SMTP_PASS)
             server.sendmail(SMTP_FROM, recipient_email, msg.as_string())
 
-        print(f"[EMAIL] Successfully sent to {recipient_email}")
+        logger.info(f"[EMAIL] Successfully sent to {recipient_email}")
         return True
 
     except Exception as e:
-        print(f"[EMAIL ERROR] Failed to send to {recipient_email}: {e}")
+        logger.error(f"[EMAIL ERROR] Failed to send to {recipient_email}: {e}")
         return False
 
 
@@ -174,10 +177,10 @@ def send_welcome_email(recipient_email: str, first_name: str) -> bool:
 </html>
         """
 
-        print(f"[EMAIL] Welcome email to {recipient_email}")
+        logger.info(f"[EMAIL] Welcome email to {recipient_email}")
 
         if not SMTP_HOST or not SMTP_USER:
-            print(f"[EMAIL SIMULATED] Welcome email would be sent to {recipient_email}")
+            logger.info(f"[EMAIL SIMULATED] Welcome email would be sent to {recipient_email}")
             return True
 
         msg = MIMEMultipart('related')
@@ -192,9 +195,9 @@ def send_welcome_email(recipient_email: str, first_name: str) -> bool:
             server.login(SMTP_USER, SMTP_PASS)
             server.sendmail(SMTP_FROM, recipient_email, msg.as_string())
 
-        print(f"[EMAIL] Welcome sent to {recipient_email}")
+        logger.info(f"[EMAIL] Welcome sent to {recipient_email}")
         return True
 
     except Exception as e:
-        print(f"[EMAIL ERROR] Welcome email failed for {recipient_email}: {e}")
+        logger.error(f"[EMAIL ERROR] Welcome email failed for {recipient_email}: {e}")
         return False

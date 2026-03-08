@@ -1,7 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models import db, Ticket, TicketType, Event, Payment, User, Seat
-from app.schemas.user_schema import TicketSchema
 from app.utils.security import ValidationHandler
 from app.utils.email import send_ticket_email
 from datetime import datetime
@@ -15,7 +14,6 @@ import io
 import base64
 
 tickets_bp = Blueprint('tickets', __name__, url_prefix='/api/tickets')
-ticket_schema = TicketSchema()
 
 
 @tickets_bp.route('', methods=['GET'])
@@ -222,7 +220,7 @@ def download_ticket(ticket_id):
                 ticket.qr_code = base64.b64encode(buf.getvalue()).decode()
                 db.session.commit()
             except Exception as qr_err:
-                print(f"[QR GEN ERROR] {qr_err}")
+                current_app.logger.error(f"[QR GEN ERROR] {qr_err}")
 
         ticket_data = ticket.to_dict()
         return jsonify(ticket_data), 200
@@ -354,7 +352,7 @@ def transfer_ticket(ticket_id):
             event_dict = ticket.event.to_dict() if ticket.event else {}
             send_ticket_email(recipient_email, ticket_dict, event_dict)
         except Exception as email_err:
-            print(f"[TRANSFER EMAIL ERROR] {email_err}")
+            current_app.logger.error(f"[TRANSFER EMAIL ERROR] {email_err}")
         
         return jsonify({
             'message': f'Ticket transferred successfully to {recipient_email}',

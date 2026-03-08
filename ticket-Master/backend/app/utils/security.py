@@ -8,38 +8,6 @@ import re
 import uuid
 
 
-class JWTHandler:
-    """JWT token handling utilities"""
-    
-    @staticmethod
-    def encode_token(data, expires_in=None):
-        """Encode JWT token"""
-        if expires_in is None:
-            expires_in = current_app.config['JWT_ACCESS_TOKEN_EXPIRES']
-        
-        payload = {
-            **data,
-            'iat': datetime.utcnow(),
-            'exp': datetime.utcnow() + expires_in
-        }
-        
-        return jwt.encode(
-            payload,
-            current_app.config['JWT_SECRET_KEY'],
-            algorithm=current_app.config['JWT_ALGORITHM']
-        )
-    
-    @staticmethod
-    def decode_token(token):
-        """Decode JWT token"""
-        try:
-            return jwt.decode(
-                token,
-                current_app.config['JWT_SECRET_KEY'],
-                algorithms=[current_app.config['JWT_ALGORITHM']]
-            )
-        except jwt.InvalidTokenError as e:
-            return None
 
 
 class PasswordHandler:
@@ -80,11 +48,6 @@ class ValidationHandler:
         pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
         return re.match(pattern, email) is not None
     
-    @staticmethod
-    def is_valid_phone(phone):
-        """Validate phone number (Kenya format)"""
-        pattern = r'^(\+254|0)?[1-9]\d{8}$'
-        return re.match(pattern, phone) is not None
     
     @staticmethod
     def generate_ticket_number():
