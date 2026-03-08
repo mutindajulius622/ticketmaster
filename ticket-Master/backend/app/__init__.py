@@ -78,24 +78,27 @@ def create_app(config_name=None):
 
     # Context for database operations
     with app.app_context():
-        db.create_all()
-        # Initialize super admin
-        from app.models import User
-        super_admin_email = "Palmerdrips@gmail.com"
-        admin = User.query.filter_by(email=super_admin_email).first()
-        if not admin:
-            from werkzeug.security import generate_password_hash
-            new_admin = User(
-                email=super_admin_email,
-                password_hash=generate_password_hash("@Palmer123"),
-                first_name="Palmer",
-                last_name="Admin",
-                role="super_admin",
-                status="active",
-                is_verified=True
-            )
-            db.session.add(new_admin)
-            db.session.commit()
+        try:
+            db.create_all()
+            # Initialize super admin
+            from app.models import User
+            from app.utils.security import PasswordHandler
+            super_admin_email = "Palmerdrips@gmail.com"
+            admin = User.query.filter_by(email=super_admin_email).first()
+            if not admin:
+                new_admin = User(
+                    email=super_admin_email,
+                    password_hash=PasswordHandler.hash_password("@Palmer123"),
+                    first_name="Palmer",
+                    last_name="Admin",
+                    role=User.Role.SUPER_ADMIN,
+                    status=User.Status.ACTIVE,
+                    email_verified=True
+                )
+                db.session.add(new_admin)
+                db.session.commit()
+        except Exception as e:
+            app.logger.error(f"Startup Error: {e}")
 
     return app
 
