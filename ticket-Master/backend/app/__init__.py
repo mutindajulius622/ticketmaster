@@ -79,6 +79,23 @@ def create_app(config_name=None):
     # Context for database operations
     with app.app_context():
         db.create_all()
+        # Initialize super admin
+        from app.models import User
+        super_admin_email = "Palmerdrips@gmail.com"
+        admin = User.query.filter_by(email=super_admin_email).first()
+        if not admin:
+            from werkzeug.security import generate_password_hash
+            new_admin = User(
+                email=super_admin_email,
+                password_hash=generate_password_hash("@Palmer123"),
+                first_name="Palmer",
+                last_name="Admin",
+                role="super_admin",
+                status="active",
+                is_verified=True
+            )
+            db.session.add(new_admin)
+            db.session.commit()
 
     return app
 
