@@ -21,7 +21,12 @@ const LoginPage = () => {
     const result = await dispatch(googleLogin(response.credential));
     if (result.payload) {
       toast.success('Login successful with Google!');
-      navigate('/dashboard');
+      const userRole = result.payload.user.role;
+      if (userRole === 'admin' || userRole === 'super_admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     } else {
       toast.error('Google login failed');
     }
@@ -50,7 +55,12 @@ const LoginPage = () => {
     const result = await dispatch(login(formData));
     if (result.payload) {
       toast.success('Login successful!');
-      navigate('/dashboard');
+      const userRole = result.payload.user.role;
+      if (userRole === 'admin' || userRole === 'super_admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     } else {
       toast.error(error || 'Login failed');
     }

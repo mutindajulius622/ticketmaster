@@ -42,7 +42,10 @@ function App() {
       <main className="flex-1">
         <Routes>
           {/* Public Routes */}
-          <Route path="/login" element={!isAuthenticated ? <LoginPage /> : <Navigate to="/" />} />
+          <Route
+            path="/login"
+            element={!isAuthenticated ? <LoginPage /> : <Navigate to={user?.role === 'admin' || user?.role === 'super_admin' ? '/admin' : '/dashboard'} />}
+          />
           <Route path="/register" element={!isAuthenticated ? <RegisterPage /> : <Navigate to="/" />} />
           <Route path="/" element={<HomePage />} />
           <Route path="/search" element={<SearchPage />} />
