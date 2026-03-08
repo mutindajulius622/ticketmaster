@@ -65,7 +65,11 @@ def create_app(config_name=None):
         return jsonify({'status': 'healthy', 'service': 'ticket-master-api'}), 200
     
     # Serve uploaded images
-    upload_dir = os.path.join(os.path.dirname(app.root_path), 'uploads')
+    if os.getenv('VERCEL'):
+        upload_dir = '/tmp/uploads'
+    else:
+        upload_dir = os.path.join(os.path.dirname(app.root_path), 'uploads')
+    
     os.makedirs(upload_dir, exist_ok=True)
 
     from flask import send_from_directory
