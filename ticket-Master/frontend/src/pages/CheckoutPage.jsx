@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { createPayPalOrder, capturePayPalOrder, clearCurrentOrder } from '../redux/slices/paymentsSlice';
 import paymentService from '../services/paymentService';
 import { fetchEventDetail } from '../redux/slices/eventsSlice';
+import { toast } from 'react-toastify';
 
 const CheckoutPage = () => {
   const params = useParams();
@@ -53,8 +54,7 @@ const CheckoutPage = () => {
         window.location.href = result.approve_link;
       }
     } catch (err) {
-      console.error('Order creation failed:', err);
-      alert('Failed to create order');
+      toast.error('Failed to create order');
     }
   };
 
@@ -65,7 +65,7 @@ const CheckoutPage = () => {
     const cancelled = urlParams.get('cancelled');
 
     if (cancelled) {
-      alert('Payment was cancelled');
+      toast.info('Payment was cancelled');
       window.history.replaceState({}, document.title, window.location.pathname);
       return;
     }
@@ -74,7 +74,7 @@ const CheckoutPage = () => {
       // Automatically capture the order
       dispatch(capturePayPalOrder(orderId)).then((result) => {
         if (result.type === 'payments/capturePayPalOrder/fulfilled') {
-          alert('Payment successful!');
+          toast.success('Payment successful!');
           navigate(`/dashboard`);
         }
       });

@@ -37,7 +37,7 @@ const SeatMap = ({ venueId, onReserve }) => {
       .then((res) => {
         setSections(res.sections || []);
       })
-      .catch((err) => console.error(err))
+      .catch((err) => { })
       .finally(() => setLoading(false));
   }, [venueId]);
 

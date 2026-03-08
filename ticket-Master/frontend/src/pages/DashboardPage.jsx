@@ -237,7 +237,6 @@ const DashboardPage = () => {
         finalize();
       }
     } catch (err) {
-      console.error('Download error:', err);
       toast.error('Could not download ticket. Please try again.');
       setDownloadingId(null);
     }

@@ -25,7 +25,6 @@ const SeatSelection = () => {
         }
       })
       .catch((err) => {
-        console.error(err);
         toast.error('Reservation failed');
       });
   };
