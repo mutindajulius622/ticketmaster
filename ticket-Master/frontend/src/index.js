@@ -8,6 +8,7 @@ import './styles/index.css';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
 import { SpeedInsights } from "@vercel/speed-insights/react"
+import { Analytics } from "@vercel/analytics/react"
 
 const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID || "PASTE_YOUR_GOOGLE_CLIENT_ID_HERE";
 
@@ -19,6 +20,7 @@ root.render(
         <BrowserRouter>
           <App />
           <SpeedInsights />
+          <Analytics />
         </BrowserRouter>
       </Provider>
     </GoogleOAuthProvider>
