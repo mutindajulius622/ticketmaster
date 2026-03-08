@@ -23,9 +23,7 @@
             "dest": "backend/api/index.py"
         },
         {
-            "src": "/(.*)",
-            "dest": "frontend/$1",
-            "continue": true
+            "handle": "filesystem"
         },
         {
             "src": "/(.*)",
