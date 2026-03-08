@@ -66,8 +66,13 @@ class ProductionConfig(Config):
     DEBUG = False
     TESTING = False
     _db_url = os.getenv('DATABASE_URL')
-    if _db_url and _db_url.startswith("postgres://"):
-        _db_url = _db_url.replace("postgres://", "postgresql://", 1)
+    if _db_url:
+        if _db_url.startswith("postgres://"):
+            _db_url = _db_url.replace("postgres://", "postgresql://", 1)
+    else:
+        # Fallback to local sqlite for testing if no DB is provided
+        _db_url = 'sqlite:///' + os.path.join(os.path.dirname(os.path.abspath(__file__)), 'instance', 'ticket_master.db')
+        os.makedirs(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'instance'), exist_ok=True)
     SQLALCHEMY_DATABASE_URI = _db_url
     SESSION_COOKIE_SECURE = True
     PREFERRED_URL_SCHEME = 'https'
