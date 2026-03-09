@@ -15,15 +15,23 @@
     ],
     "rewrites": [
         {
-            "source": "/api/(.*)",
+            "source": "/api/:path*",
             "destination": "/ticket-Master/backend/api/index.py"
         },
         {
-            "source": "/uploads/(.*)",
+            "source": "/uploads/:path*",
             "destination": "/ticket-Master/backend/api/index.py"
         },
         {
-            "source": "/((?!api|uploads).*)",
+            "source": "/static/:path*",
+            "destination": "/ticket-Master/frontend/static/:path*"
+        },
+        {
+            "source": "/asset-manifest.json",
+            "destination": "/ticket-Master/frontend/asset-manifest.json"
+        },
+        {
+            "source": "/((?!api|uploads|static).*)",
             "destination": "/ticket-Master/frontend/index.html"
         }
     ],
