@@ -23,8 +23,11 @@
             "dest": "ticket-Master/backend/api/index.py"
         },
         {
+            "handle": "filesystem"
+        },
+        {
             "src": "/(.*)",
-            "dest": "ticket-Master/frontend/$1"
+            "dest": "/index.html"
         }
     ],
     "env": {
