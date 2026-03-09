@@ -13,18 +13,23 @@
             }
         }
     ],
-    "rewrites": [
+    "routes": [
         {
-            "source": "/api/(.*)",
-            "destination": "/api/$1"
+            "src": "/api/(.*)",
+            "dest": "backend/api/index.py"
         },
         {
-            "source": "/uploads/(.*)",
-            "destination": "/api/uploads/$1"
+            "src": "/uploads/(.*)",
+            "dest": "backend/api/index.py"
         },
         {
-            "source": "/(.*)",
-            "destination": "/index.html"
+            "src": "/(.*)",
+            "dest": "frontend/$1",
+            "continue": true
+        },
+        {
+            "src": "/(.*)",
+            "dest": "frontend/index.html"
         }
     ],
     "env": {
