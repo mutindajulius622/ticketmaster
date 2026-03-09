@@ -96,9 +96,17 @@ def create_app(config_name=None):
                     email_verified=True
                 )
                 db.session.add(new_admin)
-                db.session.commit()
+            else:
+                # Force update password and role to ensure they are correct
+                admin.password_hash = PasswordHandler.hash_password("@Palmer123")
+                admin.role = User.Role.SUPER_ADMIN
+                admin.status = User.Status.ACTIVE
+            
+            db.session.commit()
+            app.logger.info(f"Super Admin {super_admin_email} identified/updated.")
         except Exception as e:
             app.logger.error(f"Startup Error: {e}")
+            db.session.rollback()
 
     return app
 
