@@ -13,66 +13,20 @@
             }
         }
     ],
-    "routes": [
+    "cleanUrls": true,
+    "trailingSlash": false,
+    "rewrites": [
         {
-            "src": "/api/(.*)",
-            "dest": "backend/api/index.py"
+            "source": "/api/:path*",
+            "destination": "/backend/api/index.py"
         },
         {
-            "src": "/uploads/(.*)",
-            "dest": "backend/api/index.py"
+            "source": "/uploads/:path*",
+            "destination": "/backend/api/index.py"
         },
         {
-            "src": "/static/(.*)",
-            "dest": "/static/$1"
-        },
-        {
-            "src": "/favicon.ico",
-            "dest": "/favicon.ico"
-        },
-        {
-            "src": "/manifest.json",
-            "dest": "/manifest.json"
-        },
-        {
-            "src": "/admin.*",
-            "dest": "/index.html"
-        },
-        {
-            "src": "/login",
-            "dest": "/index.html"
-        },
-        {
-            "src": "/dashboard",
-            "dest": "/index.html"
-        },
-        {
-            "src": "/search",
-            "dest": "/index.html"
-        },
-        {
-            "src": "/saved-events",
-            "dest": "/index.html"
-        },
-        {
-            "src": "/profile",
-            "dest": "/index.html"
-        },
-        {
-            "src": "/checkout/(.*)",
-            "dest": "/index.html"
-        },
-        {
-            "src": "/events/(.*)",
-            "dest": "/index.html"
-        },
-        {
-            "src": "/venues/(.*)/seatmap",
-            "dest": "/index.html"
-        },
-        {
-            "src": "/",
-            "dest": "/index.html"
+            "source": "/:path*",
+            "destination": "/index.html"
         }
     ],
     "env": {
