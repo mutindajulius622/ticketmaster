@@ -23,7 +23,7 @@
             "destination": "backend/api/index.py"
         },
         {
-            "source": "/((?!api|uploads).*)",
+            "source": "/(.*)",
             "destination": "/index.html"
         }
     ],
